@@ -5,152 +5,382 @@
 </head>
 <body>
     <div th:fragment="content">
-        <!-- Header -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Appointment Details</h2>
-                    <p class="text-gray-600">Complete appointment information</p>
+        <!-- Breadcrumb -->
+        <div class="mb-6">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="/patient/dashboard" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                            <a href="/patient/appointments" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">My Appointments</a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Appointment Details</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
+            <!-- Appointment Details Card -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Appointment Details</h1>
+                            <p class="text-blue-100">
+                                <span th:text="${#temporals.format(appointment.appointmentDate, 'EEEE, MMMM dd, yyyy')}"></span>
+                                at 
+                                <span th:text="${#temporals.format(appointment.appointmentDate, 'hh:mm a')}"></span>
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span th:switch="${appointment.status.name()}"
+                                  class="px-3 py-1 text-sm font-semibold rounded-full">
+                                <span th:case="'SCHEDULED'" class="bg-blue-100 text-blue-800">Scheduled</span>
+                                <span th:case="'COMPLETED'" class="bg-green-100 text-green-800">Completed</span>
+                                <span th:case="'CANCELLED'" class="bg-red-100 text-red-800">Cancelled</span>
+                                <span th:case="'NO_SHOW'" class="bg-gray-100 text-gray-800">No Show</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex space-x-3">
-                    <a href="/admin/appointments" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
-                        <i class="fas fa-arrow-left"></i> Back to Appointments
-                    </a>
+
+                <!-- Content -->
+                <div class="p-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Appointment Information -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                                Appointment Information
+                            </h3>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Appointment ID:</span>
+                                    <span class="text-sm text-gray-900 font-mono" th:text="${appointment.id}"></span>
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Date & Time:</span>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-900" th:text="${#temporals.format(appointment.appointmentDate, 'MMMM dd, yyyy')}"></div>
+                                        <div class="text-sm text-gray-500" th:text="${#temporals.format(appointment.appointmentDate, 'hh:mm a')}"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Reason:</span>
+                                    <span class="text-sm text-gray-900 text-right max-w-64" th:text="${appointment.reason}"></span>
+                                </div>
+                                
+                                <div th:if="${appointment.notes}" class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Notes:</span>
+                                    <span class="text-sm text-gray-700 text-right max-w-64" th:text="${appointment.notes}"></span>
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Created:</span>
+                                    <span class="text-sm text-gray-500" th:text="${#temporals.format(appointment.createdAt, 'MMM dd, yyyy hh:mm a')}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doctor Information -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                                Doctor Information
+                            </h3>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Doctor:</span>
+                                    <span class="text-sm text-gray-900 font-medium" th:text="${appointment.doctor.fullName}"></span>
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Specialization:</span>
+                                    <span class="text-sm text-gray-900" th:text="${appointment.doctor.specialization}"></span>
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">Experience:</span>
+                                    <span class="text-sm text-gray-700" th:text="${appointment.doctor.experience} + ' years'"></span>
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <span class="text-sm font-medium text-gray-600">License Number:</span>
+                                    <span class="text-sm text-gray-600 font-mono" th:text="${appointment.doctor.licenseNumber}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Check-in Status and Actions -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <!-- Check-in Status -->
+                            <div class="flex items-center space-x-3">
+                                <h4 class="text-sm font-medium text-gray-600">Check-in Status:</h4>
+                                <div th:id="'attendance-status-' + ${appointment.id}">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Loading...
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex flex-wrap gap-2">
+                                <!-- Check-in Button (only for today's scheduled appointments) -->
+                                <button th:if="${appointment.status.name() == 'SCHEDULED' && 
+                                              #temporals.format(appointment.appointmentDate, 'yyyy-MM-dd') == #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                                        th:onclick="'checkInOnline(' + ${appointment.id} + ')'"
+                                        th:id="'checkin-btn-' + ${appointment.id}"
+                                        class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md text-sm">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Check In Online
+                                </button>
+                                
+                                <!-- QR Code Button -->
+                                <button th:onclick="'showQrCode(' + ${appointment.id} + ')'"
+                                        class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md text-sm">
+                                    <i class="fas fa-qrcode mr-1"></i>
+                                    Show QR Code
+                                </button>
+                                
+                                <!-- Cancel Button (only for scheduled future appointments) -->
+                                <a th:if="${appointment.status.name() == 'SCHEDULED' && 
+                                          appointment.appointmentDate.isAfter(T(java.time.LocalDateTime).now())}"
+                                   th:href="@{'/patient/appointment/' + ${appointment.id} + '/cancel'}" 
+                                   class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md text-sm"
+                                   onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                    <i class="fas fa-times-circle mr-1"></i>
+                                    Cancel Appointment
+                                </a>
+                                
+                                <!-- Back Button -->
+                                <a href="/patient/appointments" 
+                                   class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md text-sm">
+                                    <i class="fas fa-arrow-left mr-1"></i>
+                                    Back to Appointments
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Appointment Information -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-calendar-alt text-blue-600 text-xl mr-3"></i>
-                    <h3 class="text-lg font-semibold text-gray-800">Appointment Information</h3>
+        <!-- QR Code Modal -->
+        <div id="qr-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Appointment QR Code</h3>
+                        <button onclick="closeQrModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="text-center">
+                        <div id="qr-code-container" class="mb-4">
+                            <!-- QR code will be generated here -->
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Scan this QR code at the hospital check-in station or use the Check In button above.
+                        </p>
+                        <div id="qr-code-text" class="text-xs text-gray-500 font-mono bg-gray-100 p-2 rounded break-all">
+                            <!-- QR code text will appear here -->
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+        <script>
+            // Load attendance status on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                loadAttendanceStatus([[${appointment.id}]]);
+            });
+
+            function loadAttendanceStatus(appointmentId) {
+                fetch(`/attendance/status/${appointmentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusElement = document.getElementById(`attendance-status-${appointmentId}`);
+                        const status = data.status || 'SCHEDULED';
+                        
+                        let statusClass, statusText;
+                        switch(status) {
+                            case 'CHECKED_IN':
+                                statusClass = 'bg-blue-100 text-blue-800';
+                                statusText = 'Checked In';
+                                break;
+                            case 'PRESENT':
+                                statusClass = 'bg-green-100 text-green-800';
+                                statusText = 'Present';
+                                break;
+                            case 'NO_SHOW':
+                                statusClass = 'bg-red-100 text-red-800';
+                                statusText = 'No Show';
+                                break;
+                            case 'LATE':
+                                statusClass = 'bg-orange-100 text-orange-800';
+                                statusText = 'Late';
+                                break;
+                            case 'CANCELLED':
+                                statusClass = 'bg-gray-100 text-gray-800';
+                                statusText = 'Cancelled';
+                                break;
+                            default:
+                                statusClass = 'bg-gray-100 text-gray-800';
+                                statusText = 'Not Checked In';
+                        }
+                        
+                        statusElement.innerHTML = `
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">
+                                ${statusText}
+                            </span>
+                        `;
+                        
+                        // Update check-in button if patient is already checked in
+                        if (status !== 'SCHEDULED') {
+                            const checkinBtn = document.getElementById(`checkin-btn-${appointmentId}`);
+                            if (checkinBtn) {
+                                checkinBtn.disabled = true;
+                                checkinBtn.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Already Checked In';
+                                checkinBtn.className = 'bg-gray-400 text-white font-medium py-2 px-4 rounded-md text-sm cursor-not-allowed';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading attendance status:', error);
+                        const statusElement = document.getElementById(`attendance-status-${appointmentId}`);
+                        statusElement.innerHTML = `
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                Unknown
+                            </span>
+                        `;
+                    });
+            }
+
+            function checkInOnline(appointmentId) {
+                const button = document.getElementById(`checkin-btn-${appointmentId}`);
+                const originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Checking In...';
                 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Appointment ID</label>
-                        <p class="text-gray-800 font-mono" th:text="${appointment.id}">1</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Date & Time</label>
-                        <p class="text-gray-800" th:text="${#temporals.format(appointment.appointmentDate, 'EEEE, MMM dd, yyyy ''at'' HH:mm')}">Monday, Jan 01, 2024 at 10:00</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Status</label>
-                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full"
-                              th:classappend="${appointment.status.name() == 'SCHEDULED'} ? 'bg-green-100 text-green-800' : (${appointment.status.name() == 'COMPLETED'} ? 'bg-blue-100 text-blue-800' : (${appointment.status.name() == 'CANCELLED'} ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'))"
-                              th:text="${appointment.status.name()}">SCHEDULED</span>
-                    </div>
-                    <div th:if="${appointment.reason}">
-                        <label class="block text-sm font-medium text-gray-600">Reason for Visit</label>
-                        <p class="text-gray-800" th:text="${appointment.reason}">Regular checkup</p>
-                    </div>
-                    <div th:if="${appointment.notes}">
-                        <label class="block text-sm font-medium text-gray-600">Notes</label>
-                        <p class="text-gray-800" th:text="${appointment.notes}">Additional notes</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Created On</label>
-                        <p class="text-gray-800" th:text="${#temporals.format(appointment.createdAt, 'MMM dd, yyyy ''at'' HH:mm')}">Jan 01, 2024 at 09:00</p>
-                    </div>
-                    <div th:if="${appointment.updatedAt}">
-                        <label class="block text-sm font-medium text-gray-600">Last Updated</label>
-                        <p class="text-gray-800" th:text="${#temporals.format(appointment.updatedAt, 'MMM dd, yyyy ''at'' HH:mm')}">Jan 01, 2024 at 09:30</p>
-                    </div>
-                </div>
-            </div>
+                fetch(`/attendance/checkin/online/${appointmentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        button.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Checked In Successfully';
+                        button.className = 'bg-green-600 text-white font-medium py-2 px-4 rounded-md text-sm cursor-not-allowed';
+                        loadAttendanceStatus(appointmentId); // Refresh status
+                        
+                        // Show success message
+                        showMessage('Successfully checked in for your appointment!', 'success');
+                    } else {
+                        throw new Error('Check-in failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during check-in:', error);
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                    showMessage('Check-in failed. Please try again or contact reception.', 'error');
+                });
+            }
 
-            <!-- Patient & Doctor Information -->
-            <div class="space-y-6">
-                <!-- Patient Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <i class="fas fa-user text-green-600 text-xl mr-3"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Patient Information</h3>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="h-12 w-12 bg-green-500 rounded-full flex items-center justify-center">
-                            <span class="text-white font-medium" 
-                                  th:text="${appointment.patient.firstName.substring(0,1)} + ${appointment.patient.lastName.substring(0,1)}">JD</span>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-semibold text-gray-800" 
-                                th:text="${appointment.patient.firstName + ' ' + appointment.patient.lastName}">John Doe</h4>
-                            <p class="text-gray-600" th:text="'Patient ID: ' + ${appointment.patient.id}">Patient ID: 1</p>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-3">
-                        <div class="flex items-center">
-                            <i class="fas fa-envelope text-gray-400 mr-2"></i>
-                            <span class="text-gray-800" th:text="${appointment.patient.email}">john@example.com</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-phone text-gray-400 mr-2"></i>
-                            <span class="text-gray-800" th:text="${appointment.patient.phoneNumber}">+1234567890</span>
-                        </div>
-                        <div class="flex items-center" th:if="${appointment.patient.dateOfBirth}">
-                            <i class="fas fa-birthday-cake text-gray-400 mr-2"></i>
-                            <span class="text-gray-800" th:text="${appointment.patient.dateOfBirth}">Jan 01, 1990</span>
-                        </div>
-                        <div class="flex items-start" th:if="${appointment.patient.address}">
-                            <i class="fas fa-map-marker-alt text-gray-400 mr-2 mt-1"></i>
-                            <span class="text-gray-800" th:text="${appointment.patient.address}">123 Main St, City, State</span>
-                        </div>
-                    </div>
-                </div>
+            function showQrCode(appointmentId) {
+                fetch(`/attendance/qr/${appointmentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.qrCode) {
+                            // Generate QR code
+                            const qrContainer = document.getElementById('qr-code-container');
+                            qrContainer.innerHTML = '';
+                            
+                            QRCode.toCanvas(qrContainer, data.qrCode, {
+                                width: 200,
+                                height: 200,
+                                colorDark: '#000000',
+                                colorLight: '#ffffff'
+                            }, function (error) {
+                                if (error) {
+                                    console.error(error);
+                                    qrContainer.innerHTML = '<p class="text-red-500">Error generating QR code</p>';
+                                }
+                            });
+                            
+                            // Show QR code text
+                            document.getElementById('qr-code-text').textContent = data.qrCode;
+                            
+                            // Show modal
+                            document.getElementById('qr-modal').classList.remove('hidden');
+                            document.getElementById('qr-modal').classList.add('flex');
+                        } else {
+                            showMessage('Error loading QR code', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading QR code:', error);
+                        showMessage('Error loading QR code', 'error');
+                    });
+            }
 
-                <!-- Doctor Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <i class="fas fa-user-md text-blue-600 text-xl mr-3"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Doctor Information</h3>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4 mb-4">
-                        <div class="h-12 w-12 bg-blue-500 rounded-full flex items-center justify-center">
-                            <span class="text-white font-medium" 
-                                  th:text="${appointment.doctor.firstName.substring(0,1)} + ${appointment.doctor.lastName.substring(0,1)}">DS</span>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-semibold text-gray-800" 
-                                th:text="'Dr. ' + ${appointment.doctor.firstName + ' ' + appointment.doctor.lastName}">Dr. Jane Smith</h4>
-                            <p class="text-gray-600" th:text="'Doctor ID: ' + ${appointment.doctor.id}">Doctor ID: 1</p>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-3">
-                        <div class="flex items-center">
-                            <i class="fas fa-stethoscope text-gray-400 mr-2"></i>
-                            <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800"
-                                  th:text="${appointment.doctor.specialization}">Cardiology</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-envelope text-gray-400 mr-2"></i>
-                            <span class="text-gray-800" th:text="${appointment.doctor.email}">doctor@example.com</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-phone text-gray-400 mr-2"></i>
-                            <span class="text-gray-800" th:text="${appointment.doctor.phoneNumber}">+1234567890</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-award text-gray-400 mr-2"></i>
-                            <span class="text-gray-800" th:text="${appointment.doctor.experience + ' years experience'}">10 years experience</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-id-card text-gray-400 mr-2"></i>
-                            <span class="text-gray-800" th:text="'License: ' + ${appointment.doctor.licenseNumber}">License: LIC123456</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            function closeQrModal() {
+                document.getElementById('qr-modal').classList.add('hidden');
+                document.getElementById('qr-modal').classList.remove('flex');
+            }
 
+            function showMessage(message, type) {
+                // Create a temporary message element
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+                    type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
+                    type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
+                    'bg-blue-50 border border-blue-200 text-blue-800'
+                }`;
+                messageDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="flex-1">${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(messageDiv);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 5000);
+            }
 
-    </div>
+            // Close modal when clicking outside
+            document.getElementById('qr-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeQrModal();
+                }
+            });
+        </script>
     </div>
 </body>
 </html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Counselor Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-800 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-bold">Smart Hospital Management</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span>Welcome, Patient!</span>
+                <a href="/logout" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900" th:text="${counselor.firstName + ' ' + counselor.lastName}"></h1>
+                <p class="text-gray-600 mt-2" th:text="${counselor.specialization}"></p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="/patient/mental-health" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Mental Health
+                </a>
+                <a href="/patient/dashboard" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Counselor Profile Card -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Profile Info -->
+                <div class="lg:col-span-2">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Profile Information</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">First Name</label>
+                                <p class="mt-1 text-gray-900" th:text="${counselor.firstName}"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Last Name</label>
+                                <p class="mt-1 text-gray-900" th:text="${counselor.lastName}"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Email</label>
+                                <p class="mt-1 text-gray-900" th:text="${counselor.email}"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <p class="mt-1 text-gray-900" th:text="${counselor.phoneNumber}"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Specialization</label>
+                                <p class="mt-1 text-gray-900" th:text="${counselor.specialization}"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Type</label>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+                                      th:classappend="${counselor.type.name() == 'MENTAL_HEALTH'} ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'"
+                                      th:text="${#strings.replace(counselor.type.name(), '_', ' ')}"></span>
+                            </div>
+                            <div th:if="${counselor.qualifications}">
+                                <label class="block text-sm font-medium text-gray-700">Qualifications</label>
+                                <p class="mt-1 text-gray-900" th:text="${counselor.qualifications}"></p>
+                            </div>
+                            <div th:if="${counselor.yearsExperience}">
+                                <label class="block text-sm font-medium text-gray-700">Experience</label>
+                                <p class="mt-1 text-gray-900" th:text="${counselor.yearsExperience + ' years'}"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${counselor.bio}" class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">About</h3>
+                        <p class="text-gray-700" th:text="${counselor.bio}"></p>
+                    </div>
+                </div>
+
+                <!-- Availability and Actions -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Availability</h3>
+                        
+                        <div class="mb-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                                  th:classappend="${counselor.availabilityStatus.name() == 'AVAILABLE'} ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                                <i th:class="${counselor.availabilityStatus.name() == 'AVAILABLE'} ? 'fas fa-check-circle mr-2' : 'fas fa-times-circle mr-2'"></i>
+                                <span th:text="${counselor.availabilityStatus.displayName}"></span>
+                            </span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button th:if="${counselor.availabilityStatus.name() == 'AVAILABLE'}" 
+                                    onclick="bookSession()"
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium">
+                                <i class="fas fa-calendar-plus mr-2"></i>Book Counseling Session
+                            </button>
+                            
+                            <span th:unless="${counselor.availabilityStatus.name() == 'AVAILABLE'}" 
+                                  class="w-full bg-gray-400 text-white px-4 py-2 rounded-md font-medium cursor-not-allowed block text-center">
+                                <i class="fas fa-clock mr-2"></i>Not Available
+                            </span>
+
+                            <a href="mailto:" th:href="@{'mailto:' + ${counselor.email}}" 
+                               class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium block text-center">
+                                <i class="fas fa-envelope mr-2"></i>Send Email
+                            </a>
+
+                            <a href="tel:" th:href="@{'tel:' + ${counselor.phoneNumber}}" 
+                               class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md font-medium block text-center">
+                                <i class="fas fa-phone mr-2"></i>Call Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal (placeholder) -->
+    <div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Book Counseling Session</h3>
+            <p class="text-gray-600 mb-4">Counseling session booking functionality will be implemented soon.</p>
+            <div class="flex gap-2">
+                <button onclick="closeBookingModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function bookSession() {
+            document.getElementById('bookingModal').classList.remove('hidden');
+            document.getElementById('bookingModal').classList.add('flex');
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            document.getElementById('bookingModal').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

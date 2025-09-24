@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Add New Doctor - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Add New Doctor</h2>
+                    <p class="text-gray-600">Enter doctor information to create a new account</p>
+                </div>
+                <div>
+                    <a href="/admin/doctors" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Doctors
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Doctor Form -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <form method="post" th:action="@{/admin/doctors/save}" onsubmit="return validateForm()">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- First Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter first name">
+                    </div>
+
+                    <!-- Last Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter last name">
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="doctor@hospital.com">
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter phone number">
+                    </div>
+
+                    <!-- Specialization -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Specialization *</label>
+                        <select id="specialization" name="specialization" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Specialization</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Orthopedics">Orthopedics</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="Dermatology">Dermatology</option>
+                            <option value="Psychiatry">Psychiatry</option>
+                            <option value="General Medicine">General Medicine</option>
+                            <option value="Surgery">Surgery</option>
+                            <option value="Gynecology">Gynecology</option>
+                            <option value="Ophthalmology">Ophthalmology</option>
+                        </select>
+                    </div>
+
+                    <!-- Experience -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Experience *</label>
+                        <input type="text" id="experience" name="experience" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g. 10 years">
+                    </div>
+
+                    <!-- License Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">License Number *</label>
+                        <input type="text" id="licenseNumber" name="licenseNumber" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter license number">
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                        <input type="password" id="password" name="password" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Minimum 6 characters">
+                        <p class="text-xs text-gray-500 mt-1">Minimum 6 characters required</p>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+                    <a href="/admin/doctors" 
+                       class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200">
+                        <i class="fas fa-save mr-2"></i>Save Doctor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function validateForm() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const specialization = document.getElementById('specialization').value;
+            const experience = document.getElementById('experience').value.trim();
+            const licenseNumber = document.getElementById('licenseNumber').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!firstName || !lastName || !email || !phoneNumber || !specialization || !experience || !licenseNumber || !password) {
+                alert('Please fill in all required fields marked with *');
+                return false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                return false;
+            }
+
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters long.');
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

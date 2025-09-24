@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>System Settings - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">System Settings</h2>
+                    <p class="text-gray-600">Configure system settings and preferences</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/admin/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error/Success Messages -->
+        <div th:if="${error}" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <span th:text="${error}"></span>
+                </div>
+                <div th:if="${success}" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    <span th:text="${success}"></span>
+                </div>
+
+                <!-- Settings Sections -->
+                <div class="space-y-6">
+                    <!-- General Settings -->
+                    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">General Settings</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Basic system configuration and preferences</p>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6">
+                            <form class="space-y-6">
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <label for="hospital-name" class="block text-sm font-medium text-gray-700">Hospital Name</label>
+                                        <input type="text" id="hospital-name" name="hospital-name" value="Pakenham Hospital" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="hospital-address" class="block text-sm font-medium text-gray-700">Hospital Address</label>
+                                        <input type="text" id="hospital-address" name="hospital-address" value="123 Hospital St, Pakenham VIC 3810" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="hospital-phone" class="block text-sm font-medium text-gray-700">Contact Phone</label>
+                                        <input type="tel" id="hospital-phone" name="hospital-phone" value="03-9876-5432" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="hospital-email" class="block text-sm font-medium text-gray-700">Contact Email</label>
+                                        <input type="email" id="hospital-email" name="hospital-email" value="info@pakenhamhospital.com" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                        Save General Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Appointment Settings -->
+                    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Appointment Settings</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Configure appointment booking and scheduling preferences</p>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6">
+                            <form class="space-y-6">
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <label for="appointment-duration" class="block text-sm font-medium text-gray-700">Default Appointment Duration (minutes)</label>
+                                        <select id="appointment-duration" name="appointment-duration" 
+                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <option value="15">15 minutes</option>
+                                            <option value="30" selected>30 minutes</option>
+                                            <option value="45">45 minutes</option>
+                                            <option value="60">60 minutes</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="working-hours-start" class="block text-sm font-medium text-gray-700">Working Hours Start</label>
+                                        <input type="time" id="working-hours-start" name="working-hours-start" value="08:00" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="working-hours-end" class="block text-sm font-medium text-gray-700">Working Hours End</label>
+                                        <input type="time" id="working-hours-end" name="working-hours-end" value="18:00" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="advance-booking" class="block text-sm font-medium text-gray-700">Maximum Advance Booking (days)</label>
+                                        <input type="number" id="advance-booking" name="advance-booking" value="30" min="1" max="365" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="weekend-appointments" name="weekend-appointments" type="checkbox" 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label for="weekend-appointments" class="ml-2 block text-sm text-gray-900">
+                                        Allow weekend appointments
+                                    </label>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                        Save Appointment Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Security Settings</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Password policies and security configuration</p>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6">
+                            <form class="space-y-6">
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <label for="min-password-length" class="block text-sm font-medium text-gray-700">Minimum Password Length</label>
+                                        <input type="number" id="min-password-length" name="min-password-length" value="6" min="4" max="20" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="session-timeout" class="block text-sm font-medium text-gray-700">Session Timeout (minutes)</label>
+                                        <input type="number" id="session-timeout" name="session-timeout" value="30" min="5" max="480" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-center">
+                                        <input id="require-special-chars" name="require-special-chars" type="checkbox" checked 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="require-special-chars" class="ml-2 block text-sm text-gray-900">
+                                            Require special characters in passwords
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="require-numbers" name="require-numbers" type="checkbox" checked 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="require-numbers" class="ml-2 block text-sm text-gray-900">
+                                            Require numbers in passwords
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="require-uppercase" name="require-uppercase" type="checkbox" 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="require-uppercase" class="ml-2 block text-sm text-gray-900">
+                                            Require uppercase letters in passwords
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                        Save Security Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Notification Settings</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Configure email and SMS notification preferences</p>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6">
+                            <form class="space-y-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-center">
+                                        <input id="email-appointment-confirmations" name="email-appointment-confirmations" type="checkbox" checked 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="email-appointment-confirmations" class="ml-2 block text-sm text-gray-900">
+                                            Send email appointment confirmations
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="email-appointment-reminders" name="email-appointment-reminders" type="checkbox" checked 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="email-appointment-reminders" class="ml-2 block text-sm text-gray-900">
+                                            Send email appointment reminders
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="sms-reminders" name="sms-reminders" type="checkbox" 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="sms-reminders" class="ml-2 block text-sm text-gray-900">
+                                            Send SMS appointment reminders
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="admin-notifications" name="admin-notifications" type="checkbox" checked 
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <label for="admin-notifications" class="ml-2 block text-sm text-gray-900">
+                                            Send admin daily summary notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <div>
+                                        <label for="reminder-hours" class="block text-sm font-medium text-gray-700">Send reminders (hours before appointment)</label>
+                                        <input type="number" id="reminder-hours" name="reminder-hours" value="24" min="1" max="168" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="admin-email" class="block text-sm font-medium text-gray-700">Admin Email for Notifications</label>
+                                        <input type="email" id="admin-email" name="admin-email" value="admin@pakenhamhospital.com" 
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                        Save Notification Settings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- System Information -->
+                    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">System Information</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Current system status and version information</p>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6">
+                            <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">System Version</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">Smart PMS v1.0.0</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Database Status</dt>
+                                    <dd class="mt-1 text-sm text-green-600">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Connected
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Last Backup</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">September 18, 2025 - 03:00 AM</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Server Uptime</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">2 days, 14 hours</dd>
+                                </div>
+                            </dl>
+                            <div class="mt-6 flex space-x-4">
+                                <button type="button" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <i class="fas fa-download mr-2"></i>
+                                    Create Backup
+                                </button>
+                                <button type="button" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <i class="fas fa-sync-alt mr-2"></i>
+                                    Check for Updates
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Add JavaScript for form handling if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle form submissions
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Show success message (placeholder - implement actual saving logic)
+                    alert('Settings saved successfully!');
+                });
+            });
+
+            // Handle backup button
+            const backupBtn = document.querySelector('button[type="button"]:has(.fa-download)');
+            if (backupBtn) {
+                backupBtn.addEventListener('click', function() {
+                    alert('Backup process initiated. You will be notified when complete.');
+                });
+            }
+
+            // Handle update check button
+            const updateBtn = document.querySelector('button[type="button"]:has(.fa-sync-alt)');
+            if (updateBtn) {
+                updateBtn.addEventListener('click', function() {
+                    alert('Checking for updates... System is up to date.');
+                });
+            }
+        });
+    </script>
+    </div>
+</body>
+</html>

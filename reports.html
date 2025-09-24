@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Reports & Analytics - Smart PMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Reports & Analytics</h2>
+                    <p class="text-gray-600">Generate and view system reports</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/admin/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page Content -->
+                <!-- Error/Success Messages -->
+                <div th:if="${error}" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <span th:text="${error}"></span>
+                </div>
+
+                <!-- Summary Statistics -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-calendar-alt text-2xl text-blue-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total Appointments</dt>
+                                        <dd class="text-lg font-medium text-gray-900" th:text="${totalAppointments}">0</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-user-md text-2xl text-green-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total Doctors</dt>
+                                        <dd class="text-lg font-medium text-gray-900" th:text="${totalDoctors}">0</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-users text-2xl text-purple-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total Patients</dt>
+                                        <dd class="text-lg font-medium text-gray-900" th:text="${totalPatients}">0</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-2xl text-yellow-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Completed Appointments</dt>
+                                        <dd class="text-lg font-medium text-gray-900" th:text="${completedAppointments}">0</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Appointment Status Chart -->
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Appointment Status Distribution</h3>
+                            <div class="relative h-64">
+                                <canvas id="appointmentStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Appointments Chart -->
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Appointment Trends</h3>
+                            <div class="relative h-64">
+                                <canvas id="appointmentTrendsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Appointments Table -->
+                <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                    <div class="px-4 py-5 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Appointments</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Latest appointment activities in the system</p>
+                    </div>
+                    <div class="border-t border-gray-200">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr th:each="appointment : ${recentAppointments}">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900" th:text="${appointment.patient.firstName + ' ' + appointment.patient.lastName}">Patient Name</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900" th:text="${appointment.doctor.firstName + ' ' + appointment.doctor.lastName}">Doctor Name</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <span th:text="${#temporals.format(appointment.appointmentDate, 'MMM dd, yyyy HH:mm')}">Date & Time</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                                  th:classappend="${appointment.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' : appointment.status.name() == 'SCHEDULED' ? 'bg-blue-100 text-blue-800' : appointment.status.name() == 'CANCELLED' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}"
+                                                  th:text="${appointment.status.name()}">Status</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <span th:text="${appointment.reason}">Reason</span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(recentAppointments)}">
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">No appointments found</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get data from Thymeleaf
+            const completedAppointments = /*[[${completedAppointments}]]*/ 0;
+            const scheduledAppointments = /*[[${scheduledAppointments}]]*/ 0;
+            const cancelledAppointments = /*[[${cancelledAppointments}]]*/ 0;
+            const monthlyTrends = /*[[${monthlyTrends}]]*/ {};
+
+            // Debug logging
+            console.log('Completed Appointments:', completedAppointments);
+            console.log('Scheduled Appointments:', scheduledAppointments);
+            console.log('Cancelled Appointments:', cancelledAppointments);
+            console.log('Monthly Trends:', monthlyTrends);
+
+            // Extract trend data
+            const trendLabels = Object.keys(monthlyTrends);
+            const trendData = Object.values(monthlyTrends);
+
+            console.log('Trend Labels:', trendLabels);
+            console.log('Trend Data:', trendData);
+
+            // Check if Chart.js is loaded
+            console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+
+            // Check if canvas elements exist
+            const statusCanvas = document.getElementById('appointmentStatusChart');
+            const trendsCanvas = document.getElementById('appointmentTrendsChart');
+            console.log('Status Canvas:', statusCanvas);
+            console.log('Trends Canvas:', trendsCanvas);
+
+            if (!statusCanvas || !trendsCanvas) {
+                console.error('Canvas elements not found!');
+                return;
+            }
+
+            // Appointment Status Pie Chart
+            const statusCtx = statusCanvas.getContext('2d');
+            console.log('Status Canvas Context:', statusCtx);
+            
+            const statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Scheduled', 'Cancelled'],
+                    datasets: [{
+                        data: [completedAppointments, scheduledAppointments, cancelledAppointments],
+                        backgroundColor: [
+                            '#10B981',
+                            '#3B82F6',
+                            '#EF4444'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            console.log('Status Chart created:', statusChart);
+
+            // Appointment Trends Line Chart (real data)
+            const trendsCtx = trendsCanvas.getContext('2d');
+            console.log('Trends Canvas Context:', trendsCtx);
+            
+            const trendsChart = new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: trendLabels.length > 0 ? trendLabels : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Appointments',
+                        data: trendData.length > 0 ? trendData : [0, 0, 0, 0, 0, 0],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            console.log('Trends Chart created:', trendsChart);
+        });
+    </script>
+    </div>
+</body>
+</html>

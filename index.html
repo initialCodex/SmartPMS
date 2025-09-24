@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Smart Patient Management System</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Hero Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 rounded-lg mb-12">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold mb-4">Pakenham Hospital</h1>
+                <h2 class="text-3xl font-semibold mb-6">Smart Patient Management System</h2>
+                <p class="text-xl mb-8 max-w-4xl mx-auto">
+                    "Your Health, Our Priority - Modern Healthcare Management for Better Tomorrow"
+                </p>
+                
+                <!-- Show Registration/Login buttons only when NOT logged in -->
+                <div th:unless="${session.userType}" class="space-x-4">
+                    <a href="/register" class="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-6 rounded-lg inline-block">
+                        Patient Registration
+                    </a>
+                    <a href="/login" class="bg-blue-700 hover:bg-blue-900 text-white font-bold py-3 px-6 rounded-lg inline-block border border-white">
+                        Login
+                    </a>
+                </div>
+                
+                <!-- Show dashboard links when logged in -->
+                <div th:if="${session.userType}" class="space-x-4">
+                    <div class="text-2xl mb-4">
+                        <span>Welcome back, </span>
+                        <span th:text="${session.userName}" class="font-semibold"></span>
+                        <span>!</span>
+                    </div>
+                    <div class="space-x-4">
+                        <a th:if="${session.userType == 'ADMIN'}" href="/admin/dashboard" 
+                           class="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-6 rounded-lg inline-block">
+                            Go to Admin Dashboard
+                        </a>
+                        <a th:if="${session.userType == 'DOCTOR'}" href="/doctor/dashboard" 
+                           class="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-6 rounded-lg inline-block">
+                            Go to Doctor Dashboard
+                        </a>
+                        <a th:if="${session.userType == 'PATIENT'}" href="/patient/dashboard" 
+                           class="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-6 rounded-lg inline-block">
+                            Go to Patient Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Hospital Section -->
+        <div class="bg-white rounded-lg shadow-md p-8 mb-12">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">About Pakenham Hospital</h2>
+                <div class="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-600">Our Mission</h3>
+                    <p class="text-gray-700 text-lg leading-relaxed mb-6">
+                        At Pakenham Hospital, we are committed to providing exceptional healthcare services with compassion, 
+                        innovation, and excellence. Our Smart Patient Management System represents our dedication to modernizing 
+                        healthcare delivery and ensuring every patient receives personalized, efficient care.
+                    </p>
+                    
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-600">Our Vision</h3>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        To be the leading healthcare provider in the region, leveraging cutting-edge technology to enhance 
+                        patient experience, streamline medical processes, and improve health outcomes for our community.
+                    </p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="bg-blue-50 p-6 rounded-lg">
+                        <h4 class="text-xl font-semibold text-blue-700 mb-3">🏥 Comprehensive Care</h4>
+                        <p class="text-gray-600">Full spectrum of medical services from general consultation to specialized treatments</p>
+                    </div>
+                    
+                    <div class="bg-green-50 p-6 rounded-lg">
+                        <h4 class="text-xl font-semibold text-green-700 mb-3">💡 Smart Technology</h4>
+                        <p class="text-gray-600">Advanced digital systems for seamless appointment booking and treatment tracking</p>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <h4 class="text-xl font-semibold text-purple-700 mb-3">❤️ Patient-Centered</h4>
+                        <p class="text-gray-600">Dedicated to providing personalized care with dignity and respect for every individual</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div class="text-primary text-5xl mb-4">🩺</div>
+                <h3 class="text-xl font-semibold mb-3">Medical Services</h3>
+                <p class="text-gray-600">
+                    Comprehensive medical care including general practice, emergency services, 
+                    specialized consultations, and preventive healthcare programs.
+                </p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div class="text-secondary text-5xl mb-4">📅</div>
+                <h3 class="text-xl font-semibold mb-3">Easy Appointments</h3>
+                <p class="text-gray-600">
+                    Simple online appointment booking system with real-time availability, 
+                    automated reminders, and flexible scheduling options.
+                </p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div class="text-accent text-5xl mb-4">📋</div>
+                <h3 class="text-xl font-semibold mb-3">Digital Records</h3>
+                <p class="text-gray-600">
+                    Secure digital health records, treatment history tracking, 
+                    and integrated healthcare management for better continuity of care.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

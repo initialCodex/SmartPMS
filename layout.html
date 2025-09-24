@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout (title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title th:text="${title}">Smart PMS</title>
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg" th:if="${showNav != false}">
+        <div class="w-full">
+            <div class="flex items-center justify-between h-16 px-1">
+                <!-- Left side - Smart PMS -->
+                <div class="flex items-center">
+                    <!-- When logged in, go to appropriate dashboard based on user type -->
+                    <div th:if="${session.userType}">
+                        <a th:if="${session.userType == 'ADMIN'}" href="/admin/dashboard" class="flex-shrink-0">
+                            <h1 class="text-xl font-bold text-primary ml-6">Smart PMS</h1>
+                        </a>
+                        <a th:if="${session.userType == 'DOCTOR'}" href="/doctor/dashboard" class="flex-shrink-0">
+                            <h1 class="text-xl font-bold text-primary ml-6">Smart PMS</h1>
+                        </a>
+                        <a th:if="${session.userType == 'PATIENT'}" href="/patient/dashboard" class="flex-shrink-0">
+                            <h1 class="text-xl font-bold text-primary ml-6">Smart PMS</h1>
+                        </a>
+                    </div>
+                    <!-- When not logged in, go to landing page -->
+                    <div th:unless="${session.userType}">
+                        <a href="/" class="flex-shrink-0">
+                            <h1 class="text-xl font-bold text-primary ml-6">Smart PMS</h1>
+                        </a>
+                    </div>
+                </div>
+                <!-- Right side - User info and logout -->
+                <div class="flex items-center space-x-8 mr-1">
+                    <div th:if="${session.userType}" class="flex items-center space-x-6">
+                        <span th:text="${session.userName}" class="text-gray-700"></span>
+                        <span th:text="'(' + ${session.userType} + ')'" class="text-sm text-gray-500"></span>
+                        <form th:action="@{/logout}" method="post" class="inline">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                    <div th:unless="${session.userType}" class="flex items-center space-x-6">
+                        <a href="/login" class="text-gray-700 hover:text-primary">Login</a>
+                        <a href="/register" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 flex-1">
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700">
+            <p th:text="${success}"></p>
+        </div>
+        <div th:if="${error}" class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+            <p th:text="${error}"></p>
+        </div>
+        <div th:if="${info}" class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
+            <p th:text="${info}"></p>
+        </div>
+
+        <!-- Page Content -->
+        <div th:replace="${content}">
+            Content goes here
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 Smart Patient Management System - Pakenham Hospital</p>
+        </div>
+    </footer>
+</body>
+</html>

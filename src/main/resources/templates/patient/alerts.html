@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Alerts - Smart PMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .alert-item {
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .alert-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .alert-item.unread {
+            background-color: #f8f9fa;
+            border-left-color: #ffc107;
+        }
+        .alert-item.emergency {
+            border-left-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        .alert-item.urgent {
+            border-left-color: #fd7e14;
+        }
+        .alert-item.high {
+            border-left-color: #ffc107;
+        }
+        .alert-item.normal {
+            border-left-color: #198754;
+        }
+        .alert-item.low {
+            border-left-color: #6c757d;
+        }
+        .alert-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        .alert-time {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .priority-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/patient/dashboard">
+                <i class="bi bi-hospital"></i> Smart PMS
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/patient/dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link active" href="/alerts/patient">
+                    <i class="bi bi-bell"></i> Alerts
+                    <span th:if="${unreadCount > 0}" class="badge bg-warning text-dark ms-1" th:text="${unreadCount}"></span>
+                </a>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="nav-link btn btn-link p-0 border-0 text-decoration-none">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2><i class="bi bi-bell"></i> My Alerts</h2>
+                        <p class="text-muted">Stay updated with your appointments and important notifications</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary" onclick="markAllAsRead()">
+                            <i class="bi bi-check-all"></i> Mark All as Read
+                        </button>
+                        <button class="btn btn-primary" onclick="refreshAlerts()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unread Alerts Count -->
+        <div class="row mb-3" th:if="${unreadCount > 0}">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    You have <strong th:text="${unreadCount}"></strong> unread alert(s).
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts List -->
+        <div class="row">
+            <div class="col-12">
+                <div th:if="${#lists.isEmpty(alerts)}" class="text-center py-5">
+                    <i class="bi bi-bell-slash display-1 text-muted"></i>
+                    <h4 class="mt-3 text-muted">No Alerts</h4>
+                    <p class="text-muted">You don't have any alerts at this time.</p>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(alerts)}">
+                    <div th:each="alert : ${alerts}" 
+                         class="alert-item card mb-3"
+                         th:classappend="${alert.status.name() == 'READ' ? '' : 'unread'} + ' ' + ${alert.priority.name().toLowerCase()}">
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <!-- Alert Icon -->
+                                <div class="alert-icon">
+                                    <i th:class="${alert.type.name() == 'APPOINTMENT_REMINDER' ? 'bi bi-calendar-event text-primary' :
+                                                  alert.type.name() == 'LOW_ATTENDANCE' ? 'bi bi-exclamation-triangle text-warning' :
+                                                  alert.type.name() == 'NO_SHOW_WARNING' ? 'bi bi-x-circle text-danger' :
+                                                  alert.type.name() == 'EMERGENCY_NOTIFICATION' ? 'bi bi-exclamation-triangle-fill text-danger' :
+                                                  alert.type.name() == 'WAITLIST_NOTIFICATION' ? 'bi bi-clock text-info' :
+                                                  alert.type.name() == 'OVERDUE_CHECKIN' ? 'bi bi-clock-history text-warning' :
+                                                  'bi bi-bell text-secondary'}"></i>
+                                </div>
+                                
+                                <!-- Alert Content -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0" th:text="${alert.title}">Alert Title</h6>
+                                        <div>
+                                            <span class="priority-badge badge"
+                                                  th:classappend="${alert.priority.name() == 'EMERGENCY' ? 'bg-danger' :
+                                                                   alert.priority.name() == 'URGENT' ? 'bg-warning text-dark' :
+                                                                   alert.priority.name() == 'HIGH' ? 'bg-info' :
+                                                                   alert.priority.name() == 'NORMAL' ? 'bg-success' :
+                                                                   'bg-secondary'}"
+                                                  th:text="${alert.priority.name()}">NORMAL</span>
+                                            <span th:if="${alert.status.name() != 'READ'}" 
+                                                  class="badge bg-warning text-dark ms-1">NEW</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="mb-2" th:text="${alert.message}">Alert message content goes here...</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="alert-time">
+                                            <i class="bi bi-clock"></i>
+                                            <span th:text="${#temporals.format(alert.createdAt, 'MMM dd, yyyy - hh:mm a')}">Dec 15, 2023 - 10:30 AM</span>
+                                        </div>
+                                        
+                                        <div th:if="${alert.status.name() != 'READ'}">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    th:onclick="'markAsRead(' + ${alert.id} + ')'">
+                                                <i class="bi bi-check"></i> Mark as Read
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function markAsRead(alertId) {
+            fetch(`/alerts/api/${alertId}/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('Error marking alert as read: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error marking alert as read');
+            });
+        }
+
+        function markAllAsRead() {
+            if (confirm('Mark all alerts as read?')) {
+                // Get all unread alert IDs and mark them as read
+                const unreadAlerts = document.querySelectorAll('.alert-item.unread');
+                let promises = [];
+                
+                unreadAlerts.forEach(alert => {
+                    const markBtn = alert.querySelector('button[onclick*="markAsRead"]');
+                    if (markBtn) {
+                        const alertId = markBtn.getAttribute('onclick').match(/\d+/)[0];
+                        promises.push(
+                            fetch(`/alerts/api/${alertId}/mark-read`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                }
+                            })
+                        );
+                    }
+                });
+
+                Promise.all(promises)
+                    .then(() => {
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error marking alerts as read');
+                    });
+            }
+        }
+
+        function refreshAlerts() {
+            location.reload();
+        }
+
+        // Auto-refresh every 2 minutes
+        setInterval(refreshAlerts, 120000);
+    </script>
+</body>
+</html>

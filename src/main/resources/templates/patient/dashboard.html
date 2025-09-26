@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Patient Dashboard - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome to Patient Dashboard</h1>
+            <p class="text-gray-600">Manage your appointments and health records</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Book Appointment -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-primary text-4xl mb-4">📅</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Book Appointment</h3>
+                <p class="text-gray-600 mb-4">Schedule an appointment with our doctors</p>
+                <a href="/patient/book-appointment" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    Book Now
+                </a>
+            </div>
+
+            <!-- My Appointments -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-secondary text-4xl mb-4">📋</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">My Appointments</h3>
+                <p class="text-gray-600 mb-4">View your upcoming and past appointments</p>
+                <a href="/patient/appointments" class="bg-secondary hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    View All
+                </a>
+            </div>
+
+            <!-- Treatment History -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-accent text-4xl mb-4">📊</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Treatment History</h3>
+                <p class="text-gray-600 mb-4">Access your medical records and treatment history</p>
+                <a href="/patient/treatment-history" class="bg-accent hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded inline-block">
+                    View History
+                </a>
+            </div>
+
+            <!-- Profile -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-purple-600 text-4xl mb-4">👤</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">My Profile</h3>
+                <p class="text-gray-600 mb-4">Update your personal information</p>
+                <a href="/patient/profile" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    Edit Profile
+                </a>
+            </div>
+
+            <!-- Find Doctors -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 text-4xl mb-4">🩺</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Find Doctors</h3>
+                <p class="text-gray-600 mb-4">Browse available doctors by specialization</p>
+                <a href="/patient/doctors" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    Browse Doctors
+                </a>
+            </div>
+
+            <!-- Waitlist -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-orange-600 text-4xl mb-4">⏳</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">My Waitlist</h3>
+                <p class="text-gray-600 mb-4">Manage your appointment waitlist entries</p>
+                <a href="/patient/waitlist" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    View Waitlist
+                </a>
+            </div>
+
+            <!-- Mental Health -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-pink-600 text-4xl mb-4">💭</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Mental Health Support</h3>
+                <p class="text-gray-600 mb-4">Schedule counselling appointments</p>
+                <a href="/patient/mental-health" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    Get Support
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

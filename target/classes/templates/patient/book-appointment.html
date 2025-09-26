@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Book Appointment - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Book an Appointment</h1>
+                    <p class="text-gray-600">Schedule your appointment with our qualified doctors</p>
+                </div>
+                <div>
+                    <a href="/patient/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+                <form th:action="@{/patient/book-appointment}" method="post" th:object="${appointment}" class="space-y-6">
+                    
+                    <!-- Doctor Selection -->
+                    <div>
+                        <label for="doctor" class="block text-sm font-medium text-gray-700 mb-2">Select Doctor *</label>
+                        <select id="doctor" th:field="*{doctor.id}" required 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                th:classappend="${#fields.hasErrors('doctor')} ? 'border-red-500' : ''">
+                            <option value="">Choose a doctor...</option>
+                            <option th:each="doctor : ${doctors}" 
+                                    th:value="${doctor.id}" 
+                                    th:text="${doctor.fullName + ' - ' + doctor.specialization}">
+                            </option>
+                        </select>
+                        <p th:if="${#fields.hasErrors('doctor')}" th:errors="*{doctor}" class="text-red-500 text-sm mt-1"></p>
+                    </div>
+
+                    <!-- Appointment Date -->
+                    <div>
+                        <label for="appointmentDate" class="block text-sm font-medium text-gray-700 mb-2">Appointment Date *</label>
+                        <input type="date" id="appointmentDate" th:field="*{appointmentDate}" required
+                               th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                               th:classappend="${#fields.hasErrors('appointmentDate')} ? 'border-red-500' : ''">
+                        <p th:if="${#fields.hasErrors('appointmentDate')}" th:errors="*{appointmentDate}" class="text-red-500 text-sm mt-1"></p>
+                    </div>
+
+                    <!-- Appointment Time -->
+                    <div>
+                        <label for="appointmentTime" class="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
+                        <select id="appointmentTime" th:field="*{appointmentTime}" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                th:classappend="${#fields.hasErrors('appointmentTime')} ? 'border-red-500' : ''">
+                            <option value="">Select time...</option>
+                            <option value="09:00">09:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="14:00">02:00 PM</option>
+                            <option value="15:00">03:00 PM</option>
+                            <option value="16:00">04:00 PM</option>
+                            <option value="17:00">05:00 PM</option>
+                        </select>
+                        <p th:if="${#fields.hasErrors('appointmentTime')}" th:errors="*{appointmentTime}" class="text-red-500 text-sm mt-1"></p>
+                    </div>
+
+                    <!-- Reason for Visit -->
+                    <div>
+                        <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">Reason for Visit *</label>
+                        <textarea id="reason" th:field="*{reason}" required rows="4" 
+                                  placeholder="Please describe your symptoms or reason for the appointment..."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                  th:classappend="${#fields.hasErrors('reason')} ? 'border-red-500' : ''"></textarea>
+                        <p th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}" class="text-red-500 text-sm mt-1"></p>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                        <textarea id="notes" th:field="*{notes}" rows="3" 
+                                  placeholder="Any additional information you'd like to share with the doctor..."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex space-x-4">
+                        <button type="submit" 
+                                class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                            Book Appointment
+                        </button>
+                        <a href="/patient/dashboard" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-6 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Appointment Guidelines -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
+                <h3 class="text-lg font-semibold text-blue-800 mb-3">📋 Appointment Guidelines</h3>
+                <ul class="text-blue-700 space-y-2">
+                    <li>• Please arrive 15 minutes before your scheduled appointment time</li>
+                    <li>• Bring a valid ID and any relevant medical documents</li>
+                    <li>• You can reschedule or cancel your appointment up to 24 hours in advance</li>
+                    <li>• Emergency cases should contact the hospital directly</li>
+                    <li>• Consultation fees will be collected at the time of visit</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

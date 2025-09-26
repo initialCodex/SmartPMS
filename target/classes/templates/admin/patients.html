@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Patient Management - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Patient Management</h2>
+                    <p class="text-gray-600">Manage all patient accounts and information</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/admin/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a href="/admin/patients/add" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                        <i class="fas fa-plus"></i> Add Patient
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">Total Patients</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${patients.size()}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">Active Patients</p>
+                        <p class="text-2xl font-bold text-gray-800" th:text="${patients.size()}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">New This Month</p>
+                        <p class="text-2xl font-bold text-gray-800">5</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-star text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">VIP Patients</p>
+                        <p class="text-2xl font-bold text-gray-800">2</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <form method="get" th:action="@{/admin/patients}">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" name="search" th:value="${searchTerm}"
+                               placeholder="Search patients by name, email, or phone..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <a href="/admin/patients" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 text-center">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Patients Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">All Patients</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Patient
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Contact Info
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date of Birth
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Joined Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="patient : ${patients}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="h-10 w-10 flex-shrink-0">
+                                        <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                            <span class="text-white font-medium" 
+                                                  th:text="${patient.firstName.substring(0,1)} + ${patient.lastName.substring(0,1)}">JD</span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900" 
+                                             th:text="${patient.firstName + ' ' + patient.lastName}">Patient Name</div>
+                                        <div class="text-sm text-gray-500" th:text="'ID: ' + ${patient.id}">ID: 1</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900" th:text="${patient.email}">email@example.com</div>
+                                <div class="text-sm text-gray-500" th:text="${patient.phoneNumber}">+1234567890</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${patient.dateOfBirth}">Jan 01, 1990</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${#temporals.format(patient.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:switch="${patient.status.name()}"
+                                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                                    <span th:case="'ACTIVE'" class="bg-green-100 text-green-800">Active</span>
+                                    <span th:case="'INACTIVE'" class="bg-gray-100 text-gray-800">Inactive</span>
+                                    <span th:case="'VIP'" class="bg-purple-100 text-purple-800">VIP</span>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <a th:href="@{/admin/patients/{id}/edit(id=${patient.id})}" 
+                                   class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(patients)}">
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                <span th:if="${searchTerm != null and !searchTerm.isEmpty()}">
+                                    No patients found matching "<span th:text="${searchTerm}" class="font-semibold"></span>".
+                                </span>
+                                <span th:if="${searchTerm == null or searchTerm.isEmpty()}">
+                                    No patients found.
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

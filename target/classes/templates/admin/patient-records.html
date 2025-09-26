@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Patient Records - Smart PMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Patient Records</h1>
+                    <p class="text-gray-600">Access patient treatment history and medical records</p>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="/admin/dashboard" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Total Records</h3>
+                        <p class="text-3xl font-bold text-blue-600" th:text="${#lists.size(treatmentHistories)}">0</p>
+                    </div>
+                    <div class="text-blue-500 text-3xl">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Unique Patients</h3>
+                        <p class="text-3xl font-bold text-green-600" th:text="${#sets.size(#lists.toSet(treatmentHistories.![patient]))}">0</p>
+                    </div>
+                    <div class="text-green-500 text-3xl">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-700">Doctors Involved</h3>
+                        <p class="text-3xl font-bold text-purple-600" th:text="${#sets.size(#lists.toSet(treatmentHistories.![doctor]))}">0</p>
+                    </div>
+                    <div class="text-purple-500 text-3xl">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Treatment History Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800">Treatment History Records</h2>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(treatmentHistories)}" class="p-8 text-center">
+                <div class="text-gray-400 text-6xl mb-4">
+                    <i class="fas fa-file-medical"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No Treatment Records Found</h3>
+                <p class="text-gray-500 mb-6">No patient treatment records are available yet. Records will appear here as treatments are completed and documented.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(treatmentHistories)}" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Patient
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Doctor
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Treatment Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Diagnosis
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Treatment
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Prescription
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Follow-up
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="record : ${treatmentHistories}" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <i class="fas fa-user text-blue-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900" th:text="${record.patient.firstName + ' ' + record.patient.lastName}">
+                                            Patient Name
+                                        </div>
+                                        <div class="text-sm text-gray-500" th:text="${record.patient.email}">
+                                            patient@example.com
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                            <i class="fas fa-user-md text-green-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900" th:text="${record.doctor.firstName + ' ' + record.doctor.lastName}">
+                                            Doctor Name
+                                        </div>
+                                        <div class="text-sm text-gray-500" th:text="${record.doctor.specialization}">
+                                            Specialization
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${#temporals.format(record.treatmentDate, 'MMM dd, yyyy HH:mm')}">Jan 15, 2024 10:00</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900" th:text="${record.diagnosis}">Diagnosis</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900" th:text="${record.treatment}">Treatment</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900" th:text="${record.prescription ?: 'N/A'}">Prescription</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:if="${record.followUpDate}" th:text="${#temporals.format(record.followUpDate, 'MMM dd, yyyy')}">Follow-up Date</span>
+                                <span th:unless="${record.followUpDate}" class="text-gray-400">No follow-up</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">About Patient Records</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <p>This page displays all treatment history records across the hospital system. Use this to:</p>
+                        <ul class="list-disc list-inside mt-1">
+                            <li>Review patient treatment histories</li>
+                            <li>Monitor doctor activities and patient outcomes</li>
+                            <li>Track follow-up appointments and care continuity</li>
+                            <li>Generate reports for hospital administration</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Patient Records - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Patient Records</h1>
+                    <p class="text-gray-600">Treatment history and patient care records</p>
+                </div>
+                <a href="/doctor/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-blue-600 text-3xl mr-4">📊</div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Total Treatments</h3>
+                        <p class="text-2xl font-bold text-blue-600" th:text="${totalTreatments}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-green-50 p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-green-600 text-3xl mr-4">👥</div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Unique Patients</h3>
+                        <p class="text-2xl font-bold text-green-600" th:text="${uniquePatients}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-purple-50 p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-purple-600 text-3xl mr-4">👨‍⚕️</div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Doctor</h3>
+                        <p class="text-lg font-semibold text-purple-600" th:text="${doctor != null ? doctor.firstName + ' ' + doctor.lastName : 'N/A'}">Dr. Name</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
+            <strong>Error:</strong> <span th:text="${error}">Error message</span>
+        </div>
+
+        <!-- Treatment History Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800">Treatment History</h2>
+            </div>
+
+            <div th:if="${treatmentHistories != null and !treatmentHistories.empty}" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diagnosis</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Treatment</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prescription</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Follow-up</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="treatment : ${treatmentHistories}" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${treatment.treatmentDate != null ? #temporals.format(treatment.treatmentDate, 'MMM dd, yyyy HH:mm') : 'N/A'}">Date</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900" th:text="${treatment.patient != null ? treatment.patient.firstName + ' ' + treatment.patient.lastName : 'N/A'}">Patient Name</div>
+                                <div class="text-sm text-gray-500" th:text="${treatment.patient != null ? treatment.patient.email : ''}">patient@email.com</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <span th:text="${treatment.diagnosis ?: 'N/A'}" class="inline-block max-w-xs truncate">Diagnosis</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <span th:text="${treatment.treatment ?: 'N/A'}" class="inline-block max-w-xs truncate">Treatment</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <span th:text="${treatment.prescription ?: 'N/A'}" class="inline-block max-w-xs truncate">Prescription</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${treatment.followUpDate != null ? #temporals.format(treatment.followUpDate, 'MMM dd, yyyy') : 'N/A'}">Follow-up Date</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">
+                                <span th:text="${treatment.notes ?: 'N/A'}" class="inline-block max-w-xs truncate">Notes</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${treatmentHistories == null or treatmentHistories.empty}" class="text-center py-12">
+                <div class="text-gray-400 text-6xl mb-4">📋</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Treatment Records Found</h3>
+                <p class="text-gray-500">You haven't treated any patients yet, or no treatment records are available.</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-6 flex flex-wrap gap-4">
+            <a href="/doctor/treatment/add" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                Add Treatment
+            </a>
+        </div>
+    </div>
+</body>
+</html>

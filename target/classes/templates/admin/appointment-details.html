@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Appointment Details - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Appointment Details</h2>
+                    <p class="text-gray-600">Complete appointment information</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/admin/appointments" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Appointments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Appointment Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-calendar-alt text-blue-600 text-xl mr-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-800">Appointment Information</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Appointment ID</label>
+                        <p class="text-gray-800 font-mono" th:text="${appointment.id}">1</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Date & Time</label>
+                        <p class="text-gray-800" th:text="${#temporals.format(appointment.appointmentDate, 'EEEE, MMM dd, yyyy ''at'' HH:mm')}">Monday, Jan 01, 2024 at 10:00</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Status</label>
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full"
+                              th:classappend="${appointment.status.name() == 'SCHEDULED'} ? 'bg-green-100 text-green-800' : (${appointment.status.name() == 'COMPLETED'} ? 'bg-blue-100 text-blue-800' : (${appointment.status.name() == 'CANCELLED'} ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'))"
+                              th:text="${appointment.status.name()}">SCHEDULED</span>
+                    </div>
+                    <div th:if="${appointment.reason}">
+                        <label class="block text-sm font-medium text-gray-600">Reason for Visit</label>
+                        <p class="text-gray-800" th:text="${appointment.reason}">Regular checkup</p>
+                    </div>
+                    <div th:if="${appointment.notes}">
+                        <label class="block text-sm font-medium text-gray-600">Notes</label>
+                        <p class="text-gray-800" th:text="${appointment.notes}">Additional notes</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Created On</label>
+                        <p class="text-gray-800" th:text="${#temporals.format(appointment.createdAt, 'MMM dd, yyyy ''at'' HH:mm')}">Jan 01, 2024 at 09:00</p>
+                    </div>
+                    <div th:if="${appointment.updatedAt}">
+                        <label class="block text-sm font-medium text-gray-600">Last Updated</label>
+                        <p class="text-gray-800" th:text="${#temporals.format(appointment.updatedAt, 'MMM dd, yyyy ''at'' HH:mm')}">Jan 01, 2024 at 09:30</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient & Doctor Information -->
+            <div class="space-y-6">
+                <!-- Patient Information -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-user text-green-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Patient Information</h3>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="h-12 w-12 bg-green-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium" 
+                                  th:text="${appointment.patient.firstName.substring(0,1)} + ${appointment.patient.lastName.substring(0,1)}">JD</span>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800" 
+                                th:text="${appointment.patient.firstName + ' ' + appointment.patient.lastName}">John Doe</h4>
+                            <p class="text-gray-600" th:text="'Patient ID: ' + ${appointment.patient.id}">Patient ID: 1</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                            <span class="text-gray-800" th:text="${appointment.patient.email}">john@example.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-gray-400 mr-2"></i>
+                            <span class="text-gray-800" th:text="${appointment.patient.phoneNumber}">+1234567890</span>
+                        </div>
+                        <div class="flex items-center" th:if="${appointment.patient.dateOfBirth}">
+                            <i class="fas fa-birthday-cake text-gray-400 mr-2"></i>
+                            <span class="text-gray-800" th:text="${appointment.patient.dateOfBirth}">Jan 01, 1990</span>
+                        </div>
+                        <div class="flex items-start" th:if="${appointment.patient.address}">
+                            <i class="fas fa-map-marker-alt text-gray-400 mr-2 mt-1"></i>
+                            <span class="text-gray-800" th:text="${appointment.patient.address}">123 Main St, City, State</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor Information -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-user-md text-blue-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Doctor Information</h3>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="h-12 w-12 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-medium" 
+                                  th:text="${appointment.doctor.firstName.substring(0,1)} + ${appointment.doctor.lastName.substring(0,1)}">DS</span>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800" 
+                                th:text="'Dr. ' + ${appointment.doctor.firstName + ' ' + appointment.doctor.lastName}">Dr. Jane Smith</h4>
+                            <p class="text-gray-600" th:text="'Doctor ID: ' + ${appointment.doctor.id}">Doctor ID: 1</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-stethoscope text-gray-400 mr-2"></i>
+                            <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800"
+                                  th:text="${appointment.doctor.specialization}">Cardiology</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                            <span class="text-gray-800" th:text="${appointment.doctor.email}">doctor@example.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-gray-400 mr-2"></i>
+                            <span class="text-gray-800" th:text="${appointment.doctor.phoneNumber}">+1234567890</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-award text-gray-400 mr-2"></i>
+                            <span class="text-gray-800" th:text="${appointment.doctor.experience + ' years experience'}">10 years experience</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-id-card text-gray-400 mr-2"></i>
+                            <span class="text-gray-800" th:text="'License: ' + ${appointment.doctor.licenseNumber}">License: LIC123456</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    </div>
+</body>
+</html>

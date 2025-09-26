@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Treatment History - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Treatment History</h1>
+                    <p class="text-gray-600">View your medical records and treatment history</p>
+                </div>
+                <div>
+                    <a href="/patient/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div class="text-3xl font-bold text-blue-600" th:text="${totalTreatments}">0</div>
+                <div class="text-gray-600">Total Treatments</div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div class="text-3xl font-bold text-green-600" th:text="${treatmentsThisYear}">0</div>
+                <div class="text-gray-600">This Year</div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div class="text-3xl font-bold text-orange-600" th:text="${treatmentsWithFollowUp}">0</div>
+                <div class="text-gray-600">Follow-ups Scheduled</div>
+            </div>
+        </div>
+
+        <!-- Treatment History List -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div th:if="${#lists.isEmpty(treatmentHistory)}" class="p-8 text-center">
+                <div class="text-gray-400 text-6xl mb-4">📊</div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No Treatment History Found</h3>
+                <p class="text-gray-600 mb-4">You don't have any treatment records yet.</p>
+                <a href="/patient/book-appointment" 
+                   class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded inline-block">
+                    Book Your First Appointment
+                </a>
+            </div>
+
+            <div th:if="${not #lists.isEmpty(treatmentHistory)}">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Treatment Date
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Doctor
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Diagnosis
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Treatment
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Follow-up
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="treatment : ${treatmentHistory}">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900" 
+                                         th:text="${#temporals.format(treatment.treatmentDate, 'MMM dd, yyyy')}"></div>
+                                    <div class="text-sm text-gray-500" 
+                                         th:text="${#temporals.format(treatment.treatmentDate, 'hh:mm a')}"></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900" th:text="${treatment.doctor.fullName}"></div>
+                                    <div class="text-sm text-gray-500" th:text="${treatment.doctor.specialization}"></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900" th:text="${treatment.diagnosis}"></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900" th:text="${treatment.treatment}"></div>
+                                    <div th:if="${treatment.prescription}" class="text-sm text-gray-500 mt-1">
+                                        <strong>Prescription:</strong> <span th:text="${treatment.prescription}"></span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div th:if="${treatment.followUpDate != null}" class="text-sm text-gray-900" 
+                                         th:text="${#temporals.format(treatment.followUpDate, 'MMM dd, yyyy')}"></div>
+                                    <div th:if="${treatment.followUpDate == null}" class="text-sm text-gray-500">None</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a th:href="@{'/patient/treatment-history/' + ${treatment.id}}" 
+                                       class="text-blue-600 hover:text-blue-900">View Details</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

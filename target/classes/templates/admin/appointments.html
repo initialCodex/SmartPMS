@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>All Appointments - Admin - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">All Hospital Appointments</h1>
+                        <p class="text-gray-600">Monitor and manage all patient appointments across the hospital</p>
+                    </div>
+                    <div class="space-x-2">
+                        <a href="/admin/dashboard" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md inline-block">
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Statistics -->
+            <div class="grid md:grid-cols-6 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-3xl font-bold text-blue-600" th:text="${totalAppointments}">0</div>
+                    <div class="text-gray-600">Total Appointments</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-3xl font-bold text-orange-600" th:text="${todaysAppointments}">0</div>
+                    <div class="text-gray-600">Today's Appointments</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-3xl font-bold text-yellow-600" th:text="${scheduledAppointments}">0</div>
+                    <div class="text-gray-600">Scheduled</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-3xl font-bold text-green-600" th:text="${completedAppointments}">0</div>
+                    <div class="text-gray-600">Completed</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-3xl font-bold text-red-600" th:text="${cancelledAppointments}">0</div>
+                    <div class="text-gray-600">Cancelled</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-3xl font-bold text-gray-600" th:text="${noShowAppointments}">0</div>
+                    <div class="text-gray-600">No Show</div>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <form method="get" th:action="@{/admin/appointments}">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+                        <div class="lg:col-span-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                            <input type="text" name="search" th:value="${searchTerm}"
+                                   placeholder="Search by patient name, doctor name, email..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="lg:col-span-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Patient Status</label>
+                            <select name="patientStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">All Types</option>
+                                <option value="ACTIVE" th:selected="${selectedPatientStatus == 'ACTIVE'}">Active</option>
+                                <option value="INACTIVE" th:selected="${selectedPatientStatus == 'INACTIVE'}">Inactive</option>
+                                <option value="VIP" th:selected="${selectedPatientStatus == 'VIP'}">VIP</option>
+                            </select>
+                        </div>
+                        <div class="lg:col-span-3">
+                            <div class="flex gap-2">
+                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-1 text-sm">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <a href="/admin/appointments" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center gap-1 text-sm">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Appointments List -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div th:if="${appointments.empty}" class="p-8 text-center">
+                    <div class="text-gray-400 text-6xl mb-4">📅</div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">No Appointments Found</h3>
+                    <p class="text-gray-600 mb-4" th:if="${searchTerm != null and !searchTerm.isEmpty() or selectedPatientStatus != null and !selectedPatientStatus.isEmpty()}">
+                        No appointments found matching your search criteria.
+                    </p>
+                    <p class="text-gray-600 mb-4" th:if="${(searchTerm == null or searchTerm.isEmpty()) and (selectedPatientStatus == null or selectedPatientStatus.isEmpty())}">
+                        There are no appointments in the system yet.
+                    </p>
+                </div>
+
+                <div th:if="${!appointments.empty}">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date & Time
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Patient
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Patient Status
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Doctor
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Reason
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr th:each="appointment : ${appointments}" 
+                                    th:class="${appointment.status.name() == 'CANCELLED'} ? 'bg-red-50' : 
+                                              (${appointment.status.name() == 'COMPLETED'} ? 'bg-green-50' : 
+                                              (${appointment.status.name() == 'NO_SHOW'} ? 'bg-gray-50' : ''))">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900" 
+                                             th:text="${#temporals.format(appointment.appointmentDate, 'MMM dd, yyyy')}"></div>
+                                        <div class="text-sm text-gray-500" 
+                                             th:text="${#temporals.format(appointment.appointmentDate, 'hh:mm a')}"></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900" th:text="${appointment.patient.fullName}"></div>
+                                        <div class="text-sm text-gray-500" th:text="${appointment.patient.email}"></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span th:switch="${appointment.patient.status.name()}"
+                                              class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                                            <span th:case="'ACTIVE'" class="bg-green-100 text-green-800">Active</span>
+                                            <span th:case="'INACTIVE'" class="bg-gray-100 text-gray-800">Inactive</span>
+                                            <span th:case="'VIP'" class="bg-purple-100 text-purple-800">VIP</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900" th:text="${appointment.doctor.fullName}"></div>
+                                        <div class="text-sm text-gray-500" th:text="${appointment.doctor.specialization}"></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900" th:text="${appointment.reason}"></div>
+                                        <div th:if="${appointment.notes}" class="text-sm text-gray-500 mt-1" th:text="${appointment.notes}"></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span th:switch="${appointment.status.name()}"
+                                              class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                            <span th:case="'SCHEDULED'" class="bg-blue-100 text-blue-800">Scheduled</span>
+                                            <span th:case="'COMPLETED'" class="bg-green-100 text-green-800">Completed</span>
+                                            <span th:case="'CANCELLED'" class="bg-red-100 text-red-800">Cancelled</span>
+                                            <span th:case="'NO_SHOW'" class="bg-gray-100 text-gray-800">No Show</span>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="space-x-2">
+                                            <a th:href="@{'/admin/appointment/' + ${appointment.id}}" 
+                                               class="text-blue-600 hover:text-blue-900">View</a>
+                                            
+                                            <div th:if="${appointment.status.name() == 'SCHEDULED'}" class="inline">
+                                                <form th:action="@{'/admin/appointment/' + ${appointment.id} + '/cancel'}" 
+                                                      method="post" class="inline">
+                                                    <button type="submit" 
+                                                            onclick="return confirm('Are you sure you want to cancel this appointment?')"
+                                                            class="text-red-600 hover:text-red-900">Cancel</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tools -->
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mt-8">
+                <h3 class="text-lg font-semibold text-purple-800 mb-3">🔧 Admin Tools</h3>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <h4 class="font-medium text-purple-700 mb-2">Appointment Management</h4>
+                        <ul class="text-purple-700 space-y-1 text-sm">
+                            <li>• View all hospital appointments</li>
+                            <li>• Cancel appointments if necessary</li>
+                            <li>• Monitor appointment status</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-purple-700 mb-2">System Overview</h4>
+                        <ul class="text-purple-700 space-y-1 text-sm">
+                            <li>• Track appointment statistics</li>
+                            <li>• Monitor doctor utilization</li>
+                            <li>• Generate reports</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-purple-700 mb-2">Patient Care</h4>
+                        <ul class="text-purple-700 space-y-1 text-sm">
+                            <li>• Ensure quality service delivery</li>
+                            <li>• Handle appointment conflicts</li>
+                            <li>• Support patient needs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

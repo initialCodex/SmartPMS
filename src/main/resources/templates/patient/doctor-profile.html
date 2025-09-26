@@ -1,0 +1,201 @@
+<!DOCT<body th:replace="~{layout :: layout('Dr. ' + ${doctor.firstName} + ' ' + ${doctor.lastName}, ~{::content})}">
+    
+    <div th:fragment="content">html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head}">
+    <title th:text="'Dr. ' + ${doctor.firstName} + ' ' + ${doctor.lastName}">Doctor Profile</title>
+</head>
+
+<body th:replace="~{layout :: layout('Dr. ' + ${doctor.firstName} + ' ' + ${doctor.lastName}, ~{::content})}">>
+    <title th:text="'Dr. ' + ${doctor.firstName} + ' ' + ${doctor.lastName}">Doctor Profile</title>
+    
+    <div th:fragment="content">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Doctor Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <!-- Doctor Header -->
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 text-center">
+                        <div class="w-24 h-24 bg-white bg-opacity-20 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-user-md text-3xl"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold" th:text="'Dr. ' + ${doctor.firstName} + ' ' + ${doctor.lastName}">Dr. John Doe</h1>
+                        <p class="text-blue-100 mt-1" th:text="${doctor.specialization}">Specialty</p>
+                    </div>
+
+                    <!-- Doctor Details -->
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-gray-400 w-5 mr-3"></i>
+                                <span th:text="${doctor.email}">doctor@email.com</span>
+                            </div>
+                            <div class="flex items-center" th:if="${doctor.phoneNumber}">
+                                <i class="fas fa-phone text-gray-400 w-5 mr-3"></i>
+                                <span th:text="${doctor.phoneNumber}">Phone</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-stethoscope text-gray-400 w-5 mr-3"></i>
+                                <span th:text="${doctor.specialization}">Specialization</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock text-gray-400 w-5 mr-3"></i>
+                                <span>Mon-Fri, 9:00 AM - 5:00 PM</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Book Button -->
+                        <div class="mt-6">
+                            <button onclick="document.getElementById('bookingForm').scrollIntoView({behavior: 'smooth'})" 
+                                    class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition-colors">
+                                <i class="fas fa-calendar-plus mr-2"></i>Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available Slots and Booking -->
+            <div class="lg:col-span-2">
+                <!-- Available Time Slots -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Available Time Slots
+                    </h2>
+                    
+                    <div th:if="${availableSlots and !availableSlots.empty}">
+                        <p class="text-gray-600 mb-4">Next available appointments (showing next 7 days):</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div th:each="slot, iterStat : ${availableSlots}" 
+                                 th:if="${iterStat.index < 10}"
+                                 class="border border-gray-200 rounded-md p-3 hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer slot-option"
+                                 th:data-datetime="${slot}">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <div class="font-medium text-gray-800" 
+                                             th:text="${#temporals.format(slot, 'EEEE, MMM dd')}">Monday, Jan 15</div>
+                                        <div class="text-sm text-gray-600" 
+                                             th:text="${#temporals.format(slot, 'h:mm a')}">2:00 PM</div>
+                                    </div>
+                                    <div class="text-green-600">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${availableSlots == null or availableSlots.empty}" class="text-center py-8 text-gray-500">
+                        <i class="fas fa-calendar-times text-4xl mb-4"></i>
+                        <p>No available slots in the next 7 days. Please try again later or contact the office.</p>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <div class="bg-white rounded-lg shadow-md p-6" id="bookingForm">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-calendar-plus mr-2 text-green-600"></i>Book Appointment
+                    </h2>
+
+                    <form th:action="@{/patient/book-appointment}" method="post" th:object="${appointment}">
+                        <input type="hidden" th:field="*{doctor.id}" th:value="${doctor.id}">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="appointmentDate" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Preferred Date
+                                </label>
+                                <input type="date" 
+                                       th:field="*{appointmentDate}"
+                                       id="appointmentDate"
+                                       required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label for="appointmentTime" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Preferred Time
+                                </label>
+                                <select th:field="*{appointmentTime}" 
+                                        id="appointmentTime"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Time</option>
+                                    <option value="09:00">9:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">
+                                Reason for Visit
+                            </label>
+                            <input type="text" 
+                                   th:field="*{reason}"
+                                   id="reason"
+                                   placeholder="Brief description of your health concern..."
+                                   required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                                Additional Notes (Optional)
+                            </label>
+                            <textarea th:field="*{notes}"
+                                      id="notes"
+                                      rows="3"
+                                      placeholder="Any additional information you'd like the doctor to know..."
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+
+                        <div class="flex space-x-4">
+                            <button type="submit" 
+                                    class="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <i class="fas fa-calendar-plus mr-2"></i>Book Appointment
+                            </button>
+                            <a th:href="@{/patient/doctors}" 
+                               class="bg-gray-300 text-gray-700 py-2 px-6 rounded-md hover:bg-gray-400 text-center">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set minimum date to today
+        document.getElementById('appointmentDate').min = new Date().toISOString().split('T')[0];
+        
+        // Handle slot selection
+        document.querySelectorAll('.slot-option').forEach(slot => {
+            slot.addEventListener('click', function() {
+                const datetime = this.dataset.datetime;
+                const date = datetime.split('T')[0];
+                const time = datetime.split('T')[1].substring(0, 5);
+                
+                document.getElementById('appointmentDate').value = date;
+                document.getElementById('appointmentTime').value = time;
+                
+                // Highlight selected slot
+                document.querySelectorAll('.slot-option').forEach(s => s.classList.remove('bg-blue-100', 'border-blue-300'));
+                this.classList.add('bg-blue-100', 'border-blue-300');
+                
+                // Scroll to form
+                document.getElementById('bookingForm').scrollIntoView({behavior: 'smooth'});
+            });
+        });
+    </script>
+    </div>
+</body>
+</html>

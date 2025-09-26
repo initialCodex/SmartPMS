@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>My Schedule - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">My Schedule</h1>
+                    <p class="text-gray-600">Manage your availability and appointments</p>
+                    <p class="text-sm text-gray-500 mt-1" th:text="${doctor != null ? 'Dr. ' + doctor.firstName + ' ' + doctor.lastName + ' - ' + doctor.specialization : ''}">
+                        Doctor Info
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/doctor/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-blue-600 text-3xl mr-4">📅</div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Today's Appointments</h3>
+                        <p class="text-2xl font-bold text-blue-600" th:text="${todaysCount}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-green-50 p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-green-600 text-3xl mr-4">🔜</div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Upcoming (30 days)</h3>
+                        <p class="text-2xl font-bold text-green-600" th:text="${upcomingCount}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-purple-50 p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-purple-600 text-3xl mr-4">✅</div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Completed</h3>
+                        <p class="text-2xl font-bold text-purple-600" th:text="${completedAppointments}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-orange-50 p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-orange-600 text-3xl mr-4">📊</div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Total Appointments</h3>
+                        <p class="text-2xl font-bold text-orange-600" th:text="${totalAppointments}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
+            <strong>Error:</strong> <span th:text="${error}">Error message</span>
+        </div>
+
+        <!-- Schedule Tabs -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                    <button onclick="showTab('today')" id="today-tab" 
+                            class="tab-button py-4 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600">
+                        Today's Schedule
+                    </button>
+                    <button onclick="showTab('upcoming')" id="upcoming-tab" 
+                            class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        Upcoming Appointments
+                    </button>
+                    <button onclick="showTab('all')" id="all-tab" 
+                            class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        All Appointments
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Today's Schedule Tab -->
+            <div id="today-content" class="tab-content">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">Today's Schedule</h2>
+                    <p class="text-gray-600 text-sm" th:text="${#temporals.format(#temporals.createNow(), 'EEEE, MMMM dd, yyyy')}">Current Date</p>
+                </div>
+
+                <div th:if="${todaysAppointments != null and not #lists.isEmpty(todaysAppointments)}" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="appointment : ${todaysAppointments}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <span th:text="${appointment.appointmentDate != null ? #temporals.format(appointment.appointmentDate, 'HH:mm') : 'N/A'}">Time</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900" th:text="${appointment.patient != null ? appointment.patient.firstName + ' ' + appointment.patient.lastName : 'N/A'}">Patient Name</div>
+                                    <div class="text-sm text-gray-500" th:text="${appointment.patient != null ? appointment.patient.email : ''}">patient@email.com</div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${appointment.reason ?: 'N/A'}">Reason</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                          th:classappend="${appointment.status.name() == 'SCHEDULED' ? 'bg-yellow-100 text-yellow-800' : 
+                                                           appointment.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                           appointment.status.name() == 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                                           'bg-gray-100 text-gray-800'}"
+                                          th:text="${appointment.status}">
+                                        Status
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <span class="text-gray-400">Actions Disabled</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${todaysAppointments == null or #lists.isEmpty(todaysAppointments)}" class="text-center py-12">
+                    <div class="text-gray-400 text-6xl mb-4">📅</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Appointments Today</h3>
+                    <p class="text-gray-500">You have a free day! No appointments scheduled for today.</p>
+                </div>
+            </div>
+
+            <!-- Upcoming Appointments Tab -->
+            <div id="upcoming-content" class="tab-content hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">Upcoming Appointments</h2>
+                    <p class="text-gray-600 text-sm">Next 30 days</p>
+                </div>
+
+                <div th:if="${upcomingAppointments != null and not #lists.isEmpty(upcomingAppointments)}" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="appointment : ${upcomingAppointments}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <span th:text="${appointment.appointmentDate != null ? #temporals.format(appointment.appointmentDate, 'MMM dd, yyyy HH:mm') : 'N/A'}">Date Time</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900" th:text="${appointment.patient != null ? appointment.patient.firstName + ' ' + appointment.patient.lastName : 'N/A'}">Patient Name</div>
+                                    <div class="text-sm text-gray-500" th:text="${appointment.patient != null ? appointment.patient.email : ''}">patient@email.com</div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${appointment.reason ?: 'N/A'}">Reason</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                          th:classappend="${appointment.status.name() == 'SCHEDULED' ? 'bg-yellow-100 text-yellow-800' : 
+                                                           appointment.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                           appointment.status.name() == 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                                           'bg-gray-100 text-gray-800'}"
+                                          th:text="${appointment.status}">
+                                        Status
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <span class="text-gray-400">View Disabled</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${upcomingAppointments == null or #lists.isEmpty(upcomingAppointments)}" class="text-center py-12">
+                    <div class="text-gray-400 text-6xl mb-4">🔜</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Upcoming Appointments</h3>
+                    <p class="text-gray-500">You have no appointments scheduled for the next 30 days.</p>
+                </div>
+            </div>
+
+            <!-- All Appointments Tab -->
+            <div id="all-content" class="tab-content hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">All Appointments</h2>
+                    <p class="text-gray-600 text-sm">Complete appointment history</p>
+                </div>
+
+                <div th:if="${allAppointments != null and not #lists.isEmpty(allAppointments)}" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="appointment : ${allAppointments}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <span th:text="${appointment.appointmentDate != null ? #temporals.format(appointment.appointmentDate, 'MMM dd, yyyy HH:mm') : 'N/A'}">Date Time</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900" th:text="${appointment.patient != null ? appointment.patient.firstName + ' ' + appointment.patient.lastName : 'N/A'}">Patient Name</div>
+                                    <div class="text-sm text-gray-500" th:text="${appointment.patient != null ? appointment.patient.email : ''}">patient@email.com</div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900" th:text="${appointment.reason ?: 'N/A'}">Reason</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                          th:classappend="${appointment.status.name() == 'SCHEDULED' ? 'bg-yellow-100 text-yellow-800' : 
+                                                           appointment.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                           appointment.status.name() == 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                                           'bg-gray-100 text-gray-800'}"
+                                          th:text="${appointment.status}">
+                                        Status
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <span class="text-gray-400">View Disabled</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${allAppointments == null or #lists.isEmpty(allAppointments)}" class="text-center py-12">
+                    <div class="text-gray-400 text-6xl mb-4">📋</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Appointments Found</h3>
+                    <p class="text-gray-500">You haven't had any appointments yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-6 flex flex-wrap gap-4">
+            <a href="/doctor/patients" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Patient Records
+            </a>
+            <a href="/doctor/treatment/add" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                Add Treatment
+            </a>
+        </div>
+    </div>
+
+    <!-- JavaScript for tab functionality -->
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+            
+            // Remove active styles from all tabs
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => {
+                tab.classList.remove('border-blue-500', 'text-blue-600');
+                tab.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-content').classList.remove('hidden');
+            
+            // Add active styles to selected tab
+            const activeTab = document.getElementById(tabName + '-tab');
+            activeTab.classList.remove('border-transparent', 'text-gray-500');
+            activeTab.classList.add('border-blue-500', 'text-blue-600');
+        }
+
+        // Set default tab on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            showTab('today');
+        });
+    </script>
+</body>
+</html>

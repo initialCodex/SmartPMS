@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Admin Dashboard - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome to Admin Dashboard</h1>
+            <p class="text-gray-600">Manage the hospital system and users</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Manage Doctors -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-primary text-4xl mb-4">👨‍⚕️</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Manage Doctors</h3>
+                <p class="text-gray-600 mb-4">Add, edit, and manage doctor accounts</p>
+                <a href="/admin/doctors" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    Manage Doctors
+                </a>
+            </div>
+
+            <!-- View Patients -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-secondary text-4xl mb-4">👥</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">View Patients</h3>
+                <p class="text-gray-600 mb-4">View and manage patient records</p>
+                <a href="/admin/patients" class="bg-secondary hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    View Patients
+                </a>
+            </div>
+
+            <!-- All Appointments -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-accent text-4xl mb-4">📅</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">All Appointments</h3>
+                <p class="text-gray-600 mb-4">Monitor all hospital appointments</p>
+                <a href="/admin/appointments" class="bg-accent hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded inline-block">
+                    View Appointments
+                </a>
+            </div>
+
+            <!-- Waitlist Management -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-orange-600 text-4xl mb-4">⏳</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Waitlist Management</h3>
+                <p class="text-gray-600 mb-4">Manage patient waitlists and notifications</p>
+                <a href="/admin/waitlist" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    Manage Waitlist
+                </a>
+            </div>
+
+            <!-- Attendance Tracking -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-teal-600 text-4xl mb-4">✅</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">Attendance Tracking</h3>
+                <p class="text-gray-600 mb-4">Monitor patient check-ins and attendance</p>
+                <a href="/admin/attendance" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    View Attendance
+                </a>
+            </div>
+
+            <!-- System Reports -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-purple-600 text-4xl mb-4">📊</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">System Reports</h3>
+                <p class="text-gray-600 mb-4">Generate and view system reports</p>
+                <a href="/admin/reports" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    View Reports
+                </a>
+            </div>
+
+            <!-- Settings -->
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div class="text-indigo-600 text-4xl mb-4">⚙️</div>
+                <h3 class="text-xl font-semibold mb-2 text-gray-800">System Settings</h3>
+                <p class="text-gray-600 mb-4">Configure system settings and preferences</p>
+                <a href="/admin/settings" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded inline-block">
+                    Settings
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Quick Statistics</h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-primary" th:text="${totalDoctors}">0</div>
+                    <div class="text-gray-600">Total Doctors</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600" th:text="${activePatients}">0</div>
+                    <div class="text-gray-600">Active Patients</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-yellow-600" th:text="${vipPatients}">0</div>
+                    <div class="text-gray-600">VIP Patients</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-accent" th:text="${todaysAppointments}">0</div>
+                    <div class="text-gray-600">Today's Appointments</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600" th:text="${pendingAppointments}">0</div>
+                    <div class="text-gray-600">Pending Appointments</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Check-In - Smart PMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-hospital text-2xl"></i>
+                <h1 class="text-xl font-bold">Smart PMS - Patient Check-In</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/admin/dashboard" class="hover:text-blue-200">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-6 px-4">
+        <!-- Welcome Message -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6 text-center">
+            <div class="text-6xl text-blue-600 mb-4">📱</div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Patient Check-In Station</h2>
+            <p class="text-gray-600 text-lg">Scan your QR code to check in for your appointment</p>
+        </div>
+
+        <!-- QR Code Scanner -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="text-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Scan QR Code</h3>
+                <p class="text-gray-600">Position your QR code within the camera view</p>
+            </div>
+            
+            <!-- Camera Scanner -->
+            <div class="max-w-md mx-auto">
+                <div id="qr-reader" class="border-2 border-gray-300 rounded-lg"></div>
+                <div class="mt-4 text-center">
+                    <button id="start-scan" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 mr-3">
+                        <i class="fas fa-camera mr-2"></i>Start Camera
+                    </button>
+                    <button id="stop-scan" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" style="display: none;">
+                        <i class="fas fa-stop mr-2"></i>Stop Camera
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Manual Entry -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4 text-center">Or Enter QR Code Manually</h4>
+                <div class="max-w-md mx-auto">
+                    <div class="flex">
+                        <input type="text" 
+                               id="manual-qr" 
+                               placeholder="Enter QR code here..."
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="manual-checkin" 
+                                class="bg-green-600 text-white px-6 py-3 rounded-r-lg hover:bg-green-700">
+                            <i class="fas fa-check mr-2"></i>Check In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="status-message" class="mb-6" style="display: none;"></div>
+
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">📋 How to Check In</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-medium text-blue-700 mb-2">QR Code Scanning</h4>
+                    <ul class="text-blue-700 space-y-1 text-sm">
+                        <li>• Click "Start Camera" to begin scanning</li>
+                        <li>• Hold your QR code in front of the camera</li>
+                        <li>• Wait for automatic detection</li>
+                        <li>• Check-in will be processed automatically</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-medium text-blue-700 mb-2">Manual Entry</h4>
+                    <ul class="text-blue-700 space-y-1 text-sm">
+                        <li>• Type your QR code in the input field</li>
+                        <li>• QR codes start with "ATTEND-"</li>
+                        <li>• Click "Check In" to process</li>
+                        <li>• Contact reception if you need help</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let html5QrCode;
+        let scanning = false;
+
+        document.getElementById('start-scan').addEventListener('click', function() {
+            startScanning();
+        });
+
+        document.getElementById('stop-scan').addEventListener('click', function() {
+            stopScanning();
+        });
+
+        document.getElementById('manual-checkin').addEventListener('click', function() {
+            const qrCode = document.getElementById('manual-qr').value.trim();
+            if (qrCode) {
+                processCheckIn(qrCode);
+            } else {
+                showMessage('Please enter a QR code', 'error');
+            }
+        });
+
+        document.getElementById('manual-qr').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('manual-checkin').click();
+            }
+        });
+
+        function startScanning() {
+            if (scanning) return;
+
+            html5QrCode = new Html5Qrcode("qr-reader");
+            
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length) {
+                    const cameraId = devices[0].id;
+                    
+                    html5QrCode.start(
+                        cameraId,
+                        {
+                            fps: 10,
+                            qrbox: { width: 250, height: 250 }
+                        },
+                        (decodedText, decodedResult) => {
+                            processCheckIn(decodedText);
+                            stopScanning();
+                        },
+                        (errorMessage) => {
+                            // Ignore scan errors
+                        }
+                    ).then(() => {
+                        scanning = true;
+                        document.getElementById('start-scan').style.display = 'none';
+                        document.getElementById('stop-scan').style.display = 'inline-block';
+                    }).catch(err => {
+                        showMessage('Error starting camera: ' + err, 'error');
+                    });
+                } else {
+                    showMessage('No cameras found on this device', 'error');
+                }
+            }).catch(err => {
+                showMessage('Error accessing cameras: ' + err, 'error');
+            });
+        }
+
+        function stopScanning() {
+            if (html5QrCode && scanning) {
+                html5QrCode.stop().then(() => {
+                    scanning = false;
+                    document.getElementById('start-scan').style.display = 'inline-block';
+                    document.getElementById('stop-scan').style.display = 'none';
+                }).catch(err => {
+                    console.error('Error stopping scan:', err);
+                });
+            }
+        }
+
+        function processCheckIn(qrCode) {
+            showMessage('Processing check-in...', 'info');
+            
+            const formData = new FormData();
+            formData.append('qrCode', qrCode);
+            formData.append('location', 'Reception Desk');
+
+            fetch('/attendance/checkin/qr', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(
+                        `✅ Check-in successful!<br>
+                        <strong>Patient:</strong> ${data.patientName}<br>
+                        <strong>Doctor:</strong> ${data.doctorName}<br>
+                        <strong>Status:</strong> ${data.status}`,
+                        'success'
+                    );
+                    document.getElementById('manual-qr').value = '';
+                } else {
+                    showMessage('❌ ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('❌ Error processing check-in: ' + error.message, 'error');
+            });
+        }
+
+        function showMessage(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            
+            let bgColor, textColor, borderColor;
+            switch(type) {
+                case 'success':
+                    bgColor = 'bg-green-50';
+                    textColor = 'text-green-800';
+                    borderColor = 'border-green-200';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-50';
+                    textColor = 'text-red-800';
+                    borderColor = 'border-red-200';
+                    break;
+                case 'info':
+                    bgColor = 'bg-blue-50';
+                    textColor = 'text-blue-800';
+                    borderColor = 'border-blue-200';
+                    break;
+                default:
+                    bgColor = 'bg-gray-50';
+                    textColor = 'text-gray-800';
+                    borderColor = 'border-gray-200';
+            }
+            
+            statusDiv.className = `${bgColor} ${textColor} border ${borderColor} rounded-lg p-4 mb-6`;
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 10000); // Hide success message after 10 seconds
+            }
+        }
+
+        // Stop scanning when page is about to unload
+        window.addEventListener('beforeunload', function() {
+            stopScanning();
+        });
+    </script>
+</body>
+</html>

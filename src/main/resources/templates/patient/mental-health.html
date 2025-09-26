@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html
+  lang="en"
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{layout :: layout(~{::title}, ~{::content})}"
+>
+  <head>
+    <title>Mental Health Support - Smart PMS</title>
+  </head>
+  <body>
+    <div th:fragment="content">
+      <!-- Header with Back Button -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+              Mental Health Support
+            </h1>
+            <p class="text-gray-600">
+              Find qualified mental health counselors and book your sessions
+            </p>
+          </div>
+          <div>
+            <a
+              href="/patient/dashboard"
+              class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+            >
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search and Filter Section -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <form
+          method="get"
+          action="/patient/mental-health"
+          class="flex flex-wrap gap-4 items-end"
+        >
+          <div class="flex-1 min-w-64">
+            <label
+              for="search"
+              class="block text-sm font-medium text-gray-700 mb-2"
+              >Search Counselors</label
+            >
+            <input
+              type="text"
+              id="search"
+              name="search"
+              th:value="${searchQuery}"
+              placeholder="Search by name, specialization..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div class="min-w-48">
+            <label
+              for="specialization"
+              class="block text-sm font-medium text-gray-700 mb-2"
+              >Specialization</label
+            >
+            <select
+              id="specialization"
+              name="specialization"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">All Specializations</option>
+              <option
+                th:each="spec : ${specializations}"
+                th:value="${spec}"
+                th:text="${spec}"
+                th:selected="${spec == selectedSpecialization}"
+              ></option>
+            </select>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+            >
+              <i class="fas fa-search mr-2"></i>Search
+            </button>
+            <a
+              href="/patient/mental-health"
+              class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium"
+            >
+              <i class="fas fa-refresh mr-2"></i>Clear
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Counselors Grid -->
+      <div th:if="${counselors != null and !counselors.isEmpty()}">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            th:each="counselor : ${counselors}"
+            class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+          >
+            <div class="p-6">
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                  <h3
+                    class="text-xl font-semibold text-gray-900"
+                    th:text="${counselor.firstName + ' ' + counselor.lastName}"
+                  ></h3>
+                  <p
+                    class="text-blue-600 font-medium"
+                    th:text="${counselor.specialization}"
+                  ></p>
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    th:classappend="${counselor.counselorType.name() == 'MENTAL_HEALTH'} ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'"
+                    th:text="${#strings.replace(counselor.counselorType.name(), '_', ' ')}"
+                  ></span>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    th:classappend="${counselor.availabilityStatus.name() == 'AVAILABLE'} ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                    th:text="${counselor.availabilityStatus.displayName}"
+                  >
+                  </span>
+                </div>
+              </div>
+
+              <div class="space-y-2 text-sm text-gray-600 mb-4">
+                <div class="flex items-center">
+                  <i class="fas fa-envelope w-4 h-4 mr-2"></i>
+                  <span th:text="${counselor.email}"></span>
+                </div>
+                <div class="flex items-center">
+                  <i class="fas fa-phone w-4 h-4 mr-2"></i>
+                  <span th:text="${counselor.phoneNumber}"></span>
+                </div>
+                <div
+                  th:if="${counselor.qualifications}"
+                  class="flex items-center"
+                >
+                  <i class="fas fa-graduation-cap w-4 h-4 mr-2"></i>
+                  <span th:text="${counselor.qualifications}"></span>
+                </div>
+                <div
+                  th:if="${counselor.yearsExperience}"
+                  class="flex items-center"
+                >
+                  <i class="fas fa-clock w-4 h-4 mr-2"></i>
+                  <span
+                    th:text="${counselor.yearsExperience + ' years experience'}"
+                  ></span>
+                </div>
+              </div>
+
+              <div>
+                <button
+                  th:if="${counselor.availabilityStatus.name() == 'AVAILABLE'}"
+                  onclick="bookSession(this)"
+                  th:data-counselor-id="${counselor.id}"
+                  th:data-counselor-name="${counselor.firstName + ' ' + counselor.lastName}"
+                  class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium"
+                >
+                  <i class="fas fa-calendar-plus mr-2"></i>Book Session
+                </button>
+                <span
+                  th:unless="${counselor.availabilityStatus.name() == 'AVAILABLE'}"
+                  class="block w-full bg-gray-400 text-white px-4 py-2 rounded-md text-center font-medium cursor-not-allowed"
+                >
+                  <i class="fas fa-clock mr-2"></i>Not Available
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        th:if="${counselors == null or counselors.isEmpty()}"
+        class="text-center py-12"
+      >
+        <div class="max-w-md mx-auto">
+          <i class="fas fa-user-md text-6xl text-gray-400 mb-4"></i>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">
+            No Mental Health Counselors Found
+          </h3>
+          <p class="text-gray-600 mb-4">
+            We couldn't find any counselors matching your criteria. Try
+            adjusting your search or filter options.
+          </p>
+          <a
+            href="/patient/mental-health"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+          >
+            <i class="fas fa-refresh mr-2"></i>View All Counselors
+          </a>
+        </div>
+      </div>
+
+      <!-- AI Chatbot Notice -->
+      <div
+        class="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg p-6 mt-8"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-semibold mb-2">
+              24/7 AI Mental Health Assistant
+            </h3>
+            <p class="text-purple-100">
+              Our AI-powered chatbot is here to provide immediate support and
+              guidance whenever you need it.
+            </p>
+          </div>
+          <div class="flex flex-col gap-2">
+            <button
+              onclick="startAIChat()"
+              class="bg-white text-purple-600 hover:bg-purple-50 px-4 py-2 rounded-md font-medium"
+            >
+              <i class="fas fa-robot mr-2"></i>Chat with AI Assistant
+            </button>
+            <button
+              onclick="testAIConnection()"
+              class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-md font-medium text-sm"
+            >
+              <i class="fas fa-wifi mr-2"></i>Test Connection
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Chat Interface -->
+      <div
+        id="chatInterface"
+        class="fixed bottom-4 right-4 w-96 bg-white rounded-lg shadow-2xl border hidden z-50"
+      >
+        <div
+          class="bg-purple-600 text-white p-4 rounded-t-lg flex justify-between items-center"
+        >
+          <h4 class="font-semibold">AI Mental Health Assistant</h4>
+          <button
+            onclick="closeChatInterface()"
+            class="text-white hover:text-gray-200"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div
+          id="chatMessages"
+          class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50"
+        >
+          <div class="flex items-start space-x-2">
+            <div class="bg-purple-600 text-white p-2 rounded-full">
+              <i class="fas fa-robot text-sm"></i>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm max-w-xs">
+              <p class="text-sm">
+                Hello! I'm your AI mental health assistant. I'm here to provide
+                support and guidance. How are you feeling today?
+              </p>
+              <span class="text-xs text-gray-500 mt-1 block">AI Assistant</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 border-t">
+          <div class="flex space-x-2">
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Type your message..."
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+              onkeypress="handleChatKeyPress(event)"
+            />
+            <button
+              onclick="sendChatMessage()"
+              id="sendButton"
+              class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md"
+            >
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">
+            <i class="fas fa-info-circle mr-1"></i>
+            This AI assistant provides general support and cannot replace
+            professional medical advice.
+          </p>
+        </div>
+      </div>
+
+      <!-- Booking Modal -->
+      <div
+        id="bookingModal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+      >
+        <div
+          class="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-screen overflow-y-auto"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Book Counseling Session</h3>
+            <button
+              onclick="closeBookingModal()"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+
+          <form id="bookingForm">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Counselor</label
+              >
+              <div class="p-3 bg-gray-50 rounded-md">
+                <div
+                  class="font-semibold text-gray-900"
+                  id="selectedCounselorName"
+                ></div>
+                <div
+                  class="text-sm text-gray-600"
+                  id="selectedCounselorSpecialization"
+                ></div>
+              </div>
+              <input type="hidden" id="counselorId" name="counselorId" />
+            </div>
+
+            <div class="mb-4">
+              <label
+                for="sessionDate"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Preferred Date</label
+              >
+              <input
+                type="date"
+                id="sessionDate"
+                name="sessionDate"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label
+                for="sessionTime"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Preferred Time</label
+              >
+              <select
+                id="sessionTime"
+                name="sessionTime"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select a time</option>
+                <option value="09:00">9:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label
+                for="sessionType"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Session Type</label
+              >
+              <select
+                id="sessionType"
+                name="sessionType"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select session type</option>
+                <option value="INITIAL_CONSULTATION">
+                  Initial Consultation
+                </option>
+                <option value="FOLLOW_UP">Follow-up Session</option>
+                <option value="CRISIS_INTERVENTION">Crisis Intervention</option>
+                <option value="BEHAVIORAL_THERAPY">Behavioral Therapy</option>
+                <option value="COGNITIVE_THERAPY">Cognitive Therapy</option>
+                <option value="TRAUMA_THERAPY">Trauma Therapy</option>
+                <option value="STRESS_MANAGEMENT">Stress Management</option>
+                <option value="FAMILY_COUNSELING">Family Counseling</option>
+                <option value="COUPLES_THERAPY">Couples Therapy</option>
+                <option value="CAREER_COUNSELING">Career Counseling</option>
+                <option value="ACADEMIC_COUNSELING">Academic Counseling</option>
+                <option value="ADDICTION_COUNSELING">
+                  Addiction Counseling
+                </option>
+                <option value="GRIEF_COUNSELING">Grief Counseling</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label
+                for="sessionMode"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Session Mode</label
+              >
+              <select
+                id="sessionMode"
+                name="sessionMode"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select session mode</option>
+                <option value="IN_PERSON">In-Person</option>
+                <option value="VIDEO_CALL">Video Call</option>
+                <option value="PHONE_CALL">Phone Call</option>
+              </select>
+            </div>
+
+            <div class="mb-6">
+              <label
+                for="reason"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >Reason for Session</label
+              >
+              <textarea
+                id="reason"
+                name="reason"
+                rows="3"
+                required
+                placeholder="Please describe your reason for booking this session..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none"
+              ></textarea>
+            </div>
+
+            <div class="flex gap-2">
+              <button
+                type="button"
+                onclick="closeBookingModal()"
+                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="submitBooking"
+                class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium"
+              >
+                <span id="submitText">Book Session</span>
+                <i
+                  id="submitLoader"
+                  class="fas fa-spinner fa-spin hidden ml-2"
+                ></i>
+              </button>
+            </div>
+          </form>
+
+          <div id="bookingResult" class="hidden mt-4"></div>
+        </div>
+      </div>
+
+      <script>
+        // Booking System
+        let selectedCounselor = null;
+
+        function bookSession(button) {
+          const counselorId = button.getAttribute("data-counselor-id");
+          const counselorName = button.getAttribute("data-counselor-name");
+
+          // Find counselor details from the card
+          const counselorCard = button.closest(".bg-white");
+          const specialization =
+            counselorCard.querySelector(".text-blue-600").textContent;
+
+          // Store selected counselor data
+          selectedCounselor = {
+            id: counselorId,
+            name: counselorName,
+            specialization: specialization,
+          };
+
+          // Populate modal with counselor info
+          document.getElementById("counselorId").value = counselorId;
+          document.getElementById("selectedCounselorName").textContent =
+            counselorName;
+          document.getElementById(
+            "selectedCounselorSpecialization"
+          ).textContent = specialization;
+
+          // Reset form
+          document.getElementById("bookingForm").reset();
+          document.getElementById("counselorId").value = counselorId; // Keep counselor ID after reset
+          document.getElementById("bookingResult").classList.add("hidden");
+
+          // Set minimum date to today
+          const today = new Date().toISOString().split("T")[0];
+          document.getElementById("sessionDate").min = today;
+
+          // Show modal
+          document.getElementById("bookingModal").classList.remove("hidden");
+          document.getElementById("bookingModal").classList.add("flex");
+        }
+
+        function closeBookingModal() {
+          document.getElementById("bookingModal").classList.add("hidden");
+          document.getElementById("bookingModal").classList.remove("flex");
+          selectedCounselor = null;
+        }
+
+        // Handle form submission
+        document
+          .getElementById("bookingForm")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+            submitBooking();
+          });
+
+        function submitBooking() {
+          const form = document.getElementById("bookingForm");
+          const submitButton = document.getElementById("submitBooking");
+          const submitText = document.getElementById("submitText");
+          const submitLoader = document.getElementById("submitLoader");
+          const resultDiv = document.getElementById("bookingResult");
+
+          // Get form data
+          const formData = new FormData(form);
+          const sessionDate = formData.get("sessionDate");
+          const sessionTime = formData.get("sessionTime");
+          const sessionType = formData.get("sessionType");
+          const sessionMode = formData.get("sessionMode");
+          const reason = formData.get("reason");
+          const counselorId = document.getElementById("counselorId").value;
+
+          // Validate required fields
+          if (
+            !sessionDate ||
+            !sessionTime ||
+            !sessionType ||
+            !sessionMode ||
+            !reason
+          ) {
+            showBookingResult(false, "Please fill in all required fields.");
+            return;
+          }
+
+          if (!counselorId) {
+            showBookingResult(false, "Please select a counselor.");
+            return;
+          }
+
+          // Combine date and time
+          const sessionDateTime = sessionDate + "T" + sessionTime + ":00";
+
+          // Disable submit button and show loading
+          submitButton.disabled = true;
+          submitText.textContent = "Booking...";
+          submitLoader.classList.remove("hidden");
+
+          // Prepare request data
+          const requestData = {
+            counselorId: parseInt(counselorId),
+            sessionDateTime: sessionDateTime,
+            sessionType: sessionType,
+            sessionMode: sessionMode,
+            reason: reason,
+          };
+
+          // Get CSRF token
+          const csrfToken = document
+            .querySelector('meta[name="_csrf"]')
+            ?.getAttribute("content");
+          const csrfHeader = document
+            .querySelector('meta[name="_csrf_header"]')
+            ?.getAttribute("content");
+
+          if (!csrfToken || !csrfHeader) {
+            showBookingResult(
+              false,
+              "Security token missing. Please refresh the page."
+            );
+            return;
+          }
+
+          // Submit booking request
+          const headers = {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          };
+          headers[csrfHeader] = csrfToken;
+
+          fetch("/patient/book-session", {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(requestData),
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.json();
+              } else {
+                return response.text().then((text) => {
+                  throw new Error(`HTTP ${response.status}: ${text}`);
+                });
+              }
+            })
+            .then((data) => {
+              if (data.success) {
+                showBookingResult(true, data.message);
+                // Reset form after successful booking
+                setTimeout(() => {
+                  closeBookingModal();
+                }, 2000);
+              } else {
+                showBookingResult(
+                  false,
+                  data.message || "Booking failed. Please try again."
+                );
+              }
+            })
+            .catch((error) => {
+              console.error("Booking error:", error);
+              showBookingResult(false, "Network error: " + error.message);
+            })
+            .finally(() => {
+              // Re-enable submit button
+              submitButton.disabled = false;
+              submitText.textContent = "Book Session";
+              submitLoader.classList.add("hidden");
+            });
+        }
+
+        function showBookingResult(success, message) {
+          const resultDiv = document.getElementById("bookingResult");
+          resultDiv.className = `mt-4 p-3 rounded-md ${
+            success ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          }`;
+          resultDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${
+                      success ? "fa-check-circle" : "fa-exclamation-circle"
+                    } mr-2"></i>
+                    ${message}
+                </div>
+            `;
+          resultDiv.classList.remove("hidden");
+        }
+
+        function startAIChat() {
+          document.getElementById("chatInterface").classList.remove("hidden");
+          document.getElementById("chatInput").focus();
+        }
+
+        function closeChatInterface() {
+          document.getElementById("chatInterface").classList.add("hidden");
+        }
+
+        function testAIConnection() {
+          fetch("/patient/chat/test")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("✅ " + data.message);
+              } else {
+                alert("❌ " + data.message);
+              }
+            })
+            .catch((error) => {
+              alert("❌ Connection test failed: " + error.message);
+            });
+        }
+
+        function handleChatKeyPress(event) {
+          if (event.key === "Enter") {
+            sendChatMessage();
+          }
+        }
+
+        function sendChatMessage() {
+          const input = document.getElementById("chatInput");
+          const message = input.value.trim();
+
+          if (!message) return;
+
+          // Add user message to chat
+          addMessageToChat(message, "user");
+
+          // Clear input and disable send button
+          input.value = "";
+          const sendButton = document.getElementById("sendButton");
+          sendButton.disabled = true;
+          sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+          // Show typing indicator
+          addTypingIndicator();
+
+          // Send message to backend
+          fetch("/patient/chat/mental-health", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: message }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              removeTypingIndicator();
+              if (data.success) {
+                addMessageToChat(data.message, "assistant");
+              } else {
+                addMessageToChat(
+                  data.message ||
+                    "Sorry, I encountered an error. Please try again.",
+                  "assistant"
+                );
+              }
+            })
+            .catch((error) => {
+              removeTypingIndicator();
+              addMessageToChat(
+                "I apologize, but I'm having trouble connecting right now. Please speak with one of our professional counselors for immediate assistance.",
+                "assistant"
+              );
+            })
+            .finally(() => {
+              // Re-enable send button
+              sendButton.disabled = false;
+              sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            });
+        }
+
+        function addMessageToChat(message, sender) {
+          const chatMessages = document.getElementById("chatMessages");
+          const messageDiv = document.createElement("div");
+
+          if (sender === "user") {
+            messageDiv.className = "flex items-start space-x-2 justify-end";
+            messageDiv.innerHTML = `
+                    <div class="bg-purple-600 text-white p-3 rounded-lg shadow-sm max-w-xs">
+                        <p class="text-sm">${escapeHtml(message)}</p>
+                        <span class="text-xs text-purple-200 mt-1 block">You</span>
+                    </div>
+                    <div class="bg-purple-600 text-white p-2 rounded-full">
+                        <i class="fas fa-user text-sm"></i>
+                    </div>
+                `;
+          } else {
+            messageDiv.className = "flex items-start space-x-2";
+            messageDiv.innerHTML = `
+                    <div class="bg-purple-600 text-white p-2 rounded-full">
+                        <i class="fas fa-robot text-sm"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm max-w-xs">
+                        <p class="text-sm">${escapeHtml(message)}</p>
+                        <span class="text-xs text-gray-500 mt-1 block">AI Assistant</span>
+                    </div>
+                `;
+          }
+
+          chatMessages.appendChild(messageDiv);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+          const chatMessages = document.getElementById("chatMessages");
+          const typingDiv = document.createElement("div");
+          typingDiv.id = "typing-indicator";
+          typingDiv.className = "flex items-start space-x-2";
+          typingDiv.innerHTML = `
+                <div class="bg-purple-600 text-white p-2 rounded-full">
+                    <i class="fas fa-robot text-sm"></i>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow-sm">
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    </div>
+                </div>
+            `;
+
+          chatMessages.appendChild(typingDiv);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+          const typingIndicator = document.getElementById("typing-indicator");
+          if (typingIndicator) {
+            typingIndicator.remove();
+          }
+        }
+
+        function escapeHtml(text) {
+          const div = document.createElement("div");
+          div.textContent = text;
+          return div.innerHTML;
+        }
+      </script>
+    </div>
+  </body>
+</html>

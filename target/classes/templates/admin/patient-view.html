@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Patient Details - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Patient Details</h2>
+                    <p class="text-gray-600">Complete patient information and appointment history</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/admin/patients" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Patients
+                    </a>
+                    <a th:href="@{'/admin/patients/' + ${patient.id} + '/edit'}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        <i class="fas fa-edit"></i> Edit Patient
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Information -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Personal Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Personal Information</h3>
+                
+                <div class="flex items-center mb-6">
+                    <div class="h-20 w-20 rounded-full bg-blue-500 flex items-center justify-center mr-4">
+                        <span class="text-white text-2xl font-bold" 
+                              th:text="${patient.firstName.substring(0,1)} + ${patient.lastName.substring(0,1)}">JD</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-800" th:text="${patient.firstName + ' ' + patient.lastName}">John Doe</h4>
+                        <p class="text-gray-600" th:text="'Patient ID: ' + ${patient.id}">Patient ID: 1</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Email:</span>
+                        <span class="text-gray-600" th:text="${patient.email}">john@example.com</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Phone:</span>
+                        <span class="text-gray-600" th:text="${patient.phoneNumber}">+1234567890</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Date of Birth:</span>
+                        <span class="text-gray-600" th:text="${patient.dateOfBirth}">Jan 01, 1990</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Address:</span>
+                        <span class="text-gray-600" th:text="${patient.address}">123 Main St, City</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Joined Date:</span>
+                        <span class="text-gray-600" th:text="${#temporals.format(patient.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Statistics</h3>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-blue-600" th:text="${appointments.size()}">5</div>
+                        <div class="text-sm text-gray-600">Total Appointments</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-600" th:text="${#lists.size(appointments.?[status.name() == 'COMPLETED'])}">3</div>
+                        <div class="text-sm text-gray-600">Completed</div>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-yellow-600" th:text="${#lists.size(appointments.?[status.name() == 'SCHEDULED'])}">1</div>
+                        <div class="text-sm text-gray-600">Scheduled</div>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-red-600" th:text="${#lists.size(appointments.?[status.name() == 'CANCELLED'])}">1</div>
+                        <div class="text-sm text-gray-600">Cancelled</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment History -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Appointment History</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date & Time
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Doctor
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Reason
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Notes
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="appointment : ${appointments}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${#temporals.format(appointment.appointmentDate, 'MMM dd, yyyy HH:mm')}">Jan 15, 2024 10:00</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${appointment.doctor.firstName + ' ' + appointment.doctor.lastName}">Dr. Smith</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${appointment.reason}">Checkup</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:class="${appointment.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' : 
+                                               appointment.status.name() == 'SCHEDULED' ? 'bg-blue-100 text-blue-800' : 
+                                               appointment.status.name() == 'CANCELLED' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}"
+                                      class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                                    <span th:text="${appointment.status}">Completed</span>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <span th:text="${appointment.notes}">Regular checkup completed</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(appointments)}">
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                No appointments found for this patient.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>

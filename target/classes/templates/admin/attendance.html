@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Attendance Management - Smart PMS</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Attendance Management</h2>
+                    <p class="text-gray-600">Monitor patient check-ins and attendance tracking</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/admin/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span th:text="${error}"></span>
+        </div>
+        <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <span th:text="${success}"></span>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-3xl font-bold text-blue-600" th:text="${todaysAttendances?.size() ?: 0}">0</div>
+                    <div class="ml-auto text-blue-600">
+                        <i class="fas fa-calendar-day text-2xl"></i>
+                    </div>
+                </div>
+                <div class="text-gray-600 mt-2">Today's Total</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-3xl font-bold text-green-600" th:text="${recentCheckIns?.size() ?: 0}">0</div>
+                    <div class="ml-auto text-green-600">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                    </div>
+                </div>
+                <div class="text-gray-600 mt-2">Recent Check-ins</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-3xl font-bold text-yellow-600" th:text="${pendingAttendances?.size() ?: 0}">0</div>
+                    <div class="ml-auto text-yellow-600">
+                        <i class="fas fa-clock text-2xl"></i>
+                    </div>
+                </div>
+                <div class="text-gray-600 mt-2">Pending</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="text-3xl font-bold text-red-600" th:text="${overdueCheckIns?.size() ?: 0}">0</div>
+                    <div class="ml-auto text-red-600">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    </div>
+                </div>
+                <div class="text-gray-600 mt-2">Overdue</div>
+            </div>
+        </div>
+
+        <!-- Recent Check-ins -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Recent Check-ins (Last Hour)</h3>
+            </div>
+
+            <div th:if="${recentCheckIns == null or recentCheckIns.empty}" class="p-8 text-center">
+                <div class="text-gray-400 text-6xl mb-4">⏱️</div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No Recent Check-ins</h3>
+                <p class="text-gray-600">No patients have checked in during the last hour.</p>
+            </div>
+
+            <div th:if="${recentCheckIns != null and !recentCheckIns.empty}">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="attendance : ${recentCheckIns}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                <i class="fas fa-user text-gray-600"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900" 
+                                                 th:text="${attendance.appointment?.patient?.firstName + ' ' + attendance.appointment?.patient?.lastName}">Patient Name</div>
+                                            <div class="text-sm text-gray-500" th:text="${attendance.appointment?.patient?.email}">patient@email.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900" 
+                                         th:text="${'Dr. ' + attendance.appointment?.doctor?.firstName + ' ' + attendance.appointment?.doctor?.lastName}">Dr. Name</div>
+                                    <div class="text-sm text-gray-500" th:text="${attendance.appointment?.doctor?.specialization}">Specialization</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span th:text="${attendance.checkInTime != null ? #temporals.format(attendance.checkInTime, 'HH:mm') : 'Not checked in'}">Time</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"
+                                          th:text="${attendance.checkInMethod ?: 'MANUAL'}">Method</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                          th:classappend="${attendance.status.name() == 'CHECKED_IN' ? 'bg-green-100 text-green-800' : attendance.status.name() == 'PRESENT' ? 'bg-blue-100 text-blue-800' : attendance.status.name() == 'NO_SHOW' ? 'bg-red-100 text-red-800' : attendance.status.name() == 'LATE' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}"
+                                          th:text="${attendance.status.name()}">STATUS</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${attendance.location ?: 'Main Office'}">Location</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Attendance -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Today's Attendance</h3>
+            </div>
+
+            <div th:if="${todaysAttendances == null or todaysAttendances.empty}" class="p-8 text-center">
+                <div class="text-gray-400 text-6xl mb-4">📅</div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No Attendance Records</h3>
+                <p class="text-gray-600">No attendance records found for today.</p>
+            </div>
+
+            <div th:if="${todaysAttendances != null and !todaysAttendances.empty}">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointment Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-in Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="attendance : ${todaysAttendances}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                <i class="fas fa-user text-gray-600"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900" 
+                                                 th:text="${attendance.appointment?.patient?.firstName + ' ' + attendance.appointment?.patient?.lastName}">Patient Name</div>
+                                            <div class="text-sm text-gray-500" th:text="${attendance.appointment?.patient?.email}">patient@email.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900" 
+                                         th:text="${'Dr. ' + attendance.appointment?.doctor?.firstName + ' ' + attendance.appointment?.doctor?.lastName}">Dr. Name</div>
+                                    <div class="text-sm text-gray-500" th:text="${attendance.appointment?.doctor?.specialization}">Specialization</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span th:text="${attendance.appointment?.appointmentDate != null ? #temporals.format(attendance.appointment.appointmentDate, 'HH:mm') : 'N/A'}">Time</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span th:text="${attendance.checkInTime != null ? #temporals.format(attendance.checkInTime, 'HH:mm') : 'Not checked in'}">Time</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                          th:classappend="${attendance.status.name() == 'CHECKED_IN' ? 'bg-green-100 text-green-800' : attendance.status.name() == 'PRESENT' ? 'bg-blue-100 text-blue-800' : attendance.status.name() == 'NO_SHOW' ? 'bg-red-100 text-red-800' : attendance.status.name() == 'LATE' ? 'bg-yellow-100 text-yellow-800' : attendance.status.name() == 'SCHEDULED' ? 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800'}"
+                                          th:text="${attendance.status.name()}">STATUS</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-1">
+                                        <form th:if="${attendance.status.name() == 'SCHEDULED'}" 
+                                              th:action="@{'/admin/attendance/' + ${attendance.appointment.id} + '/checkin'}" 
+                                              method="post" class="inline">
+                                            <button type="submit" 
+                                                    class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-2 py-1 rounded text-xs">
+                                                <i class="fas fa-check mr-1"></i>Check In
+                                            </button>
+                                        </form>
+                                        
+                                        <form th:if="${attendance.status.name() == 'CHECKED_IN'}" 
+                                              th:action="@{'/admin/attendance/' + ${attendance.id} + '/present'}" 
+                                              method="post" class="inline">
+                                            <button type="submit" 
+                                                    class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded text-xs">
+                                                <i class="fas fa-user-check mr-1"></i>Mark Present
+                                            </button>
+                                        </form>
+                                        
+                                        <form th:if="${attendance.status.name() == 'SCHEDULED' or attendance.status.name() == 'CHECKED_IN'}" 
+                                              th:action="@{'/admin/attendance/' + ${attendance.id} + '/noshow'}" 
+                                              method="post" class="inline">
+                                            <button type="submit" 
+                                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-xs"
+                                                    onclick="return confirm('Mark this patient as no-show?')">
+                                                <i class="fas fa-times mr-1"></i>No Show
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Check-ins -->
+        <div th:if="${overdueCheckIns != null and !overdueCheckIns.empty}" class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-gray-200 bg-red-50">
+                <h3 class="text-lg font-semibold text-red-800">⚠️ Overdue Check-ins</h3>
+                <p class="text-red-600 text-sm">Patients who haven't checked in for their appointments</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointment Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Overdue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="attendance : ${overdueCheckIns}" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 rounded-full bg-red-300 flex items-center justify-center">
+                                            <i class="fas fa-user text-red-600"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900" 
+                                             th:text="${attendance.appointment?.patient?.firstName + ' ' + attendance.appointment?.patient?.lastName}">Patient Name</div>
+                                        <div class="text-sm text-gray-500" th:text="${attendance.appointment?.patient?.email}">patient@email.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900" 
+                                     th:text="${'Dr. ' + attendance.appointment?.doctor?.firstName + ' ' + attendance.appointment?.doctor?.lastName}">Dr. Name</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span th:text="${attendance.appointment?.appointmentDate != null ? #temporals.format(attendance.appointment.appointmentDate, 'HH:mm') : 'N/A'}">Time</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
+                                <span>Overdue</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-1">
+                                    <form th:action="@{'/admin/attendance/' + ${attendance.id} + '/noshow'}" 
+                                          method="post" class="inline">
+                                        <button type="submit" 
+                                                class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-times mr-1"></i>Mark No Show
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Information Section -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3">📊 Attendance Management Guide</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-medium text-blue-700 mb-2">Status Types</h4>
+                    <ul class="text-blue-700 space-y-1 text-sm">
+                        <li>• <strong>SCHEDULED:</strong> Appointment booked, waiting for check-in</li>
+                        <li>• <strong>CHECKED_IN:</strong> Patient has checked in</li>
+                        <li>• <strong>PRESENT:</strong> Patient is present for appointment</li>
+                        <li>• <strong>NO_SHOW:</strong> Patient didn't show up</li>
+                        <li>• <strong>LATE:</strong> Patient arrived late</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-medium text-blue-700 mb-2">Check-in Methods</h4>
+                    <ul class="text-blue-700 space-y-1 text-sm">
+                        <li>• <strong>QR_CODE:</strong> Scanned QR code</li>
+                        <li>• <strong>MANUAL:</strong> Staff assisted check-in</li>
+                        <li>• <strong>ONLINE:</strong> Web portal check-in</li>
+                        <li>• <strong>PHONE:</strong> Phone call check-in</li>
+                        <li>• <strong>KIOSK:</strong> Self-service kiosk</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

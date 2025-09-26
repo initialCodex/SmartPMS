@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - Smart PMS'">Treatment History - Smart PMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Smart PMS</h1>
+            <div class="space-x-4 flex items-center">
+                <a th:href="@{/patient/dashboard}" class="hover:text-blue-200">Dashboard</a>
+                <a th:href="@{/patient/appointments}" class="hover:text-blue-200">My Appointments</a>
+                <a th:href="@{/patient/doctors}" class="hover:text-blue-200">Find Doctors</a>
+                <a th:href="@{/patient/treatment-history}" class="text-blue-200 font-semibold">Treatment History</a>
+                <form th:action="@{/logout}" method="post" class="inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="hover:text-blue-200 bg-transparent border-none text-white cursor-pointer">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Treatment History</h1>
+            <p class="text-gray-600">View your complete medical treatment records and history</p>
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-notes-medical text-3xl text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900" th:text="${totalTreatments}">0</div>
+                        <div class="text-gray-600">Total Treatments</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-calendar-year text-3xl text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900" th:text="${treatmentsThisYear}">0</div>
+                        <div class="text-gray-600">This Year</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clock text-3xl text-orange-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900" th:text="${treatmentsWithFollowUp}">0</div>
+                        <div class="text-gray-600">Pending Follow-ups</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Treatment History -->
+        <div class="bg-white rounded-lg shadow-md" th:if="${treatmentHistory != null and !treatmentHistory.empty}">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800">Medical Records</h2>
+            </div>
+
+            <div class="divide-y divide-gray-200">
+                <div th:each="treatment : ${treatmentHistory}" 
+                     class="px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                     th:onclick="'location.href=\'/patient/treatment-history/' + ${treatment.id} + '\''">
+                    
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user-md text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900" 
+                                        th:text="'Dr. ' + ${treatment.doctor.firstName} + ' ' + ${treatment.doctor.lastName}">Dr. John Doe</h3>
+                                    <p class="text-sm text-gray-600" th:text="${treatment.doctor.specialization}">Specialization</p>
+                                </div>
+                            </div>
+
+                            <div class="ml-16">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-500">Date:</span>
+                                        <span class="text-sm text-gray-900 ml-2" 
+                                              th:text="${#temporals.format(treatment.treatmentDate, 'MMMM dd, yyyy')}">January 15, 2024</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-500">Diagnosis:</span>
+                                        <span class="text-sm text-gray-900 ml-2" th:text="${treatment.diagnosis}">Diagnosis</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3" th:if="${treatment.treatment}">
+                                    <span class="text-sm font-medium text-gray-500">Treatment:</span>
+                                    <p class="text-sm text-gray-900 mt-1" th:text="${treatment.treatment}">Treatment details</p>
+                                </div>
+
+                                <div th:if="${treatment.prescription}" class="mb-3">
+                                    <span class="text-sm font-medium text-gray-500">Prescription:</span>
+                                    <p class="text-sm text-gray-900 mt-1" th:text="${treatment.prescription}">Prescription details</p>
+                                </div>
+
+                                <div th:if="${treatment.followUpDate}" class="flex items-center text-sm">
+                                    <i class="fas fa-calendar-check text-orange-500 mr-2"></i>
+                                    <span class="text-gray-600">Follow-up scheduled for: </span>
+                                    <span class="text-gray-900 ml-1" 
+                                          th:text="${#temporals.format(treatment.followUpDate, 'MMMM dd, yyyy')}">Follow-up date</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex-shrink-0 ml-4">
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Treatment History -->
+        <div th:if="${treatmentHistory == null or treatmentHistory.empty}" class="bg-white rounded-lg shadow-md p-12 text-center">
+            <div class="text-gray-400 mb-4">
+                <i class="fas fa-notes-medical text-6xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">No Treatment History</h3>
+            <p class="text-gray-500 mb-6">You don't have any treatment records yet. After your appointments are completed, your treatment history will appear here.</p>
+            <a th:href="@{/patient/book-appointment}" 
+               class="inline-block bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors">
+                <i class="fas fa-calendar-plus mr-2"></i>Book an Appointment
+            </a>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6" th:if="${treatmentHistory != null and !treatmentHistory.empty}">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+            <div class="flex flex-wrap gap-4">
+                <a th:href="@{/patient/book-appointment}" 
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-calendar-plus mr-2"></i>Book New Appointment
+                </a>
+                <a th:href="@{/patient/doctors}" 
+                   class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                    <i class="fas fa-user-md mr-2"></i>Find Specialists
+                </a>
+                <button onclick="window.print()" 
+                        class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-print mr-2"></i>Print History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media print {
+            .no-print, nav, .quick-actions {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+            }
+        }
+    </style>
+</body>
+</html>
